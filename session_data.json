@@ -1,0 +1,229 @@
+{
+  "last_saved": "2026-02-18T19:23:51.345331",
+  "sessions": [
+    {
+      "timestamp": "2026-02-18T19:18:43.273188",
+      "data": {
+        "reference": "ἀλλά",
+        "recognized": "αλλά",
+        "accuracy": 75.0
+      }
+    },
+    {
+      "timestamp": "2026-02-18T19:18:56.127176",
+      "data": {
+        "reference": "ἀπό",
+        "recognized": "apple",
+        "accuracy": 0.0
+      }
+    },
+    {
+      "timestamp": "2026-02-18T19:19:02.913129",
+      "data": {
+        "reference": "γάρ",
+        "recognized": "star",
+        "accuracy": 0.0
+      }
+    },
+    {
+      "timestamp": "2026-02-18T19:19:16.812587",
+      "data": {
+        "reference": "δέ",
+        "recognized": "τι",
+        "accuracy": 0.0
+      }
+    },
+    {
+      "timestamp": "2026-02-18T19:19:24.321461",
+      "data": {
+        "reference": "δέ",
+        "recognized": "δεη",
+        "accuracy": 40.0
+      }
+    },
+    {
+      "timestamp": "2026-02-18T19:19:31.533758",
+      "data": {
+        "reference": "εἰμί",
+        "recognized": "ειμί",
+        "accuracy": 75.0
+      }
+    },
+    {
+      "timestamp": "2026-02-18T19:19:39.082512",
+      "data": {
+        "reference": "ἐγώ",
+        "recognized": "ego",
+        "accuracy": 0.0
+      }
+    },
+    {
+      "timestamp": "2026-02-18T19:19:45.045709",
+      "data": {
+        "reference": "ἐγώ",
+        "recognized": "ego",
+        "accuracy": 0.0
+      }
+    },
+    {
+      "timestamp": "2026-02-18T19:19:52.313494",
+      "data": {
+        "reference": "ἐπί",
+        "recognized": "happy",
+        "accuracy": 0.0
+      }
+    },
+    {
+      "timestamp": "2026-02-18T19:19:59.114976",
+      "data": {
+        "reference": "ἐπί",
+        "recognized": "happy",
+        "accuracy": 0.0
+      }
+    },
+    {
+      "timestamp": "2026-02-18T19:20:06.867178",
+      "data": {
+        "reference": "ἔχω",
+        "recognized": "έχω",
+        "accuracy": 66.66666666666666
+      }
+    },
+    {
+      "timestamp": "2026-02-18T19:20:23.029605",
+      "data": {
+        "reference": "καί",
+        "recognized": "καίει",
+        "accuracy": 75.0
+      }
+    },
+    {
+      "timestamp": "2026-02-18T19:20:35.471309",
+      "data": {
+        "reference": "κατά",
+        "recognized": "κατά",
+        "accuracy": 100.0
+      }
+    },
+    {
+      "timestamp": "2026-02-18T19:20:51.932978",
+      "data": {
+        "reference": "λέγω",
+        "recognized": "lego",
+        "accuracy": 0.0
+      }
+    },
+    {
+      "timestamp": "2026-02-18T19:20:55.265924",
+      "data": {
+        "reference": "λέγω",
+        "recognized": "lego",
+        "accuracy": 0.0
+      }
+    },
+    {
+      "timestamp": "2026-02-18T19:21:08.104730",
+      "data": {
+        "reference": "μετά",
+        "recognized": "μετά",
+        "accuracy": 100.0
+      }
+    },
+    {
+      "timestamp": "2026-02-18T19:21:24.321550",
+      "data": {
+        "reference": "νόμος",
+        "recognized": "no max",
+        "accuracy": 0.0
+      }
+    },
+    {
+      "timestamp": "2026-02-18T19:21:28.194955",
+      "data": {
+        "reference": "νόμος",
+        "recognized": "νόμος",
+        "accuracy": 100.0
+      }
+    },
+    {
+      "timestamp": "2026-02-18T19:21:42.765031",
+      "data": {
+        "reference": "οὐδέν",
+        "recognized": "uzen",
+        "accuracy": 0.0
+      }
+    },
+    {
+      "timestamp": "2026-02-18T19:21:46.297134",
+      "data": {
+        "reference": "οὐδέν",
+        "recognized": "ουδέν",
+        "accuracy": 80.0
+      }
+    },
+    {
+      "timestamp": "2026-02-18T19:21:58.915263",
+      "data": {
+        "reference": "οὖν",
+        "recognized": "un",
+        "accuracy": 0.0
+      }
+    },
+    {
+      "timestamp": "2026-02-18T19:22:06.013756",
+      "data": {
+        "reference": "οὖν",
+        "recognized": "un",
+        "accuracy": 0.0
+      }
+    },
+    {
+      "timestamp": "2026-02-18T19:22:17.702761",
+      "data": {
+        "reference": "οὕτως",
+        "recognized": "autos",
+        "accuracy": 0.0
+      }
+    },
+    {
+      "timestamp": "2026-02-18T19:23:02.729391",
+      "data": {
+        "reference": "Σὺ νεύεις.",
+        "recognized": "συνέβης",
+        "accuracy": 37.5
+      }
+    },
+    {
+      "timestamp": "2026-02-18T19:23:15.364736",
+      "data": {
+        "reference": "Ἐγὼ κράζω.",
+        "recognized": "εγώ κρασί",
+        "accuracy": 44.44444444444444
+      }
+    },
+    {
+      "timestamp": "2026-02-18T19:23:30.309122",
+      "data": {
+        "reference": "Σὺ κράζεις.",
+        "recognized": "crazy",
+        "accuracy": 0.0
+      }
+    },
+    {
+      "timestamp": "2026-02-18T19:23:33.823937",
+      "data": {
+        "reference": "Σὺ κράζεις.",
+        "recognized": "the crazy",
+        "accuracy": 10.526315789473683
+      }
+    },
+    {
+      "timestamp": "2026-02-18T19:23:51.345331",
+      "data": {
+        "reference": "Ἐγὼ ἐσθίω.",
+        "recognized": "εγώ αστείο",
+        "accuracy": 42.10526315789473
+      }
+    }
+  ]
+}
