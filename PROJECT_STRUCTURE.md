@@ -25,6 +25,7 @@ ASR_Language_Training/
 │   │                                 - ASRThread: Main ASR processing
 │   │                                 - Google Speech Recognition support
 │   │                                 - Whisper (OpenAI) support
+│   │                                 - Qwen3-ASR support (new)
 │   │                                 - ASREngineManager: Future engine management
 │   │                                 - Planned: Vosk, Azure, AWS, IBM Watson
 │   │
@@ -106,6 +107,7 @@ ASR_Language_Training/
 - ASRThread: Multi-engine ASR processing
 - Google Speech Recognition integration
 - Whisper model loading and transcription
+- Qwen3-ASR integration (new)
 - Pronunciation analysis (accuracy calculation)
 - ASREngineManager: Plugin architecture for future engines
 

@@ -40,6 +40,7 @@
 The application supports multiple speech recognition engines:
 - **Google Speech Recognition**: Cloud-based, high accuracy
 - **Whisper**: OpenAI's open-source model, excellent accuracy, requires more processing power
+- **Qwen3-ASR**: New engine support (2026), enhanced accuracy and language support
 
 **Planned Engines** (configurable in future releases):
 - Vosk: Offline-capable, good for privacy
