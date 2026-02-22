@@ -1,5 +1,5 @@
 {
-  "last_saved": "2026-02-18T19:23:51.345331",
+  "last_saved": "2026-02-21T17:21:20.807383",
   "sessions": [
     {
       "timestamp": "2026-02-18T19:18:43.273188",
@@ -223,6 +223,158 @@
         "reference": "Ἐγὼ ἐσθίω.",
         "recognized": "εγώ αστείο",
         "accuracy": 42.10526315789473
+      }
+    },
+    {
+      "timestamp": "2026-02-21T13:41:14.288147",
+      "data": {
+        "reference": "ἄρτος",
+        "recognized": "Autos.",
+        "accuracy": 0.0
+      }
+    },
+    {
+      "timestamp": "2026-02-21T13:41:38.134720",
+      "data": {
+        "reference": "βῆμα",
+        "recognized": "Vima.",
+        "accuracy": 0.0
+      }
+    },
+    {
+      "timestamp": "2026-02-21T13:41:58.104849",
+      "data": {
+        "reference": "βίβλος",
+        "recognized": "Vivlas.",
+        "accuracy": 0.0
+      }
+    },
+    {
+      "timestamp": "2026-02-21T13:42:21.890657",
+      "data": {
+        "reference": "δύναμις",
+        "recognized": "Zeus.",
+        "accuracy": 0.0
+      }
+    },
+    {
+      "timestamp": "2026-02-21T13:42:45.256222",
+      "data": {
+        "reference": "δῶρον",
+        "recognized": "Doran.",
+        "accuracy": 0.0
+      }
+    },
+    {
+      "timestamp": "2026-02-21T13:43:18.212098",
+      "data": {
+        "reference": "ἔργον",
+        "recognized": "Ergon.",
+        "accuracy": 0.0
+      }
+    },
+    {
+      "timestamp": "2026-02-21T13:49:00.865831",
+      "data": {
+        "reference": "ἄρτος",
+        "recognized": "Eratos.",
+        "accuracy": 0.0
+      }
+    },
+    {
+      "timestamp": "2026-02-21T13:49:28.560411",
+      "data": {
+        "reference": "βῆμα",
+        "recognized": "Vima.",
+        "accuracy": 0.0
+      }
+    },
+    {
+      "timestamp": "2026-02-21T17:08:29.621765",
+      "data": {
+        "reference": "ἀλλά",
+        "recognized": "Allah.",
+        "accuracy": 0.0
+      }
+    },
+    {
+      "timestamp": "2026-02-21T17:18:23.044943",
+      "data": {
+        "reference": "ἀλλά",
+        "recognized": "άλλα.",
+        "accuracy": 100.0
+      }
+    },
+    {
+      "timestamp": "2026-02-21T17:18:39.755757",
+      "data": {
+        "reference": "ἀπό",
+        "recognized": "από",
+        "accuracy": 100.0
+      }
+    },
+    {
+      "timestamp": "2026-02-21T17:18:56.915528",
+      "data": {
+        "reference": "γάρ",
+        "recognized": "Γαρ.",
+        "accuracy": 100.0
+      }
+    },
+    {
+      "timestamp": "2026-02-21T17:19:19.323183",
+      "data": {
+        "reference": "δέ",
+        "recognized": "Δεύ.",
+        "accuracy": 80.0
+      }
+    },
+    {
+      "timestamp": "2026-02-21T17:19:38.361050",
+      "data": {
+        "reference": "εἰμί",
+        "recognized": "εμι",
+        "accuracy": 85.71428571428571
+      }
+    },
+    {
+      "timestamp": "2026-02-21T17:19:53.542126",
+      "data": {
+        "reference": "ἐγώ",
+        "recognized": "εγώ",
+        "accuracy": 100.0
+      }
+    },
+    {
+      "timestamp": "2026-02-21T17:20:14.577892",
+      "data": {
+        "reference": "ἐπί",
+        "recognized": "επί",
+        "accuracy": 100.0
+      }
+    },
+    {
+      "timestamp": "2026-02-21T17:20:36.763642",
+      "data": {
+        "reference": "ἔχω",
+        "recognized": "Εχο.",
+        "accuracy": 66.66666666666666
+      }
+    },
+    {
+      "timestamp": "2026-02-21T17:20:58.450370",
+      "data": {
+        "reference": "καί",
+        "recognized": "Κ.",
+        "accuracy": 50.0
+      }
+    },
+    {
+      "timestamp": "2026-02-21T17:21:20.807383",
+      "data": {
+        "reference": "κατά",
+        "recognized": "Κατά.",
+        "accuracy": 100.0
       }
     }
   ]

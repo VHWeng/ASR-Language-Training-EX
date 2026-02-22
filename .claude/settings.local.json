@@ -2,7 +2,14 @@
   "permissions": {
     "allow": [
       "Bash(find:*)",
-      "Bash(dir:*)"
+      "Bash(dir:*)",
+      "WebSearch",
+      "Bash(pip check:*)",
+      "Bash(pip freeze:*)",
+      "Bash(pip show:*)",
+      "Bash(pip-audit:*)",
+      "Bash(pip install:*)",
+      "Bash(pip search:*)"
     ]
   }
 }
