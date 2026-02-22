@@ -14,7 +14,7 @@ DEFAULT_CONFIG = {
     'engine': 'Google Speech Recognition',
     'language': 'el-GR',
     'language_name': 'Greek',
-    'model': 'chirp_3',
+    'model': 'latest_short',
     'sample_rate': 16000,
     'energy_threshold': 300,
     'pronunciation_threshold': 80,
@@ -331,14 +331,10 @@ class ConfigDialog(QDialog):
     def update_model_options(self):
         self.model_combo.clear()
         if self.engine_combo.currentText() == "Google Speech Recognition":
+            # Note: Free Google Speech API doesn't support model selection
+            # These options are for reference only - the API uses its default model
             self.model_combo.addItems([
                 "Default",
-                "Command and Search",
-                "Dictation",
-                "latest_short",
-                "latest_long",
-                "chirp_3",
-                "telephony"
             ])
         elif self.engine_combo.currentText() == "Whisper":
             self.model_combo.addItems([
@@ -352,14 +348,10 @@ class ConfigDialog(QDialog):
         self.model_combo.clear()
         engine = self.engine_combo.currentText()
         if engine == "Google Speech Recognition":
+            # Note: Free Google Speech API doesn't support model selection
+            # These options are for reference only - the API uses its default model
             self.model_combo.addItems([
                 "Default",
-                "Command and Search",
-                "Dictation",
-                "latest_short",
-                "latest_long",
-                "chirp_3",
-                "telephony"
             ])
         elif engine == "Whisper":
             self.model_combo.addItems([

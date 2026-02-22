@@ -60,14 +60,40 @@ class ASRThread(QThread):
         import speech_recognition as sr
 
         recognizer = sr.Recognizer()
-        recognizer.energy_threshold = self.config['energy_threshold']
+        recognizer.energy_threshold = self.config.get('energy_threshold', 300)
 
-        with sr.AudioFile(self.audio_file) as source:
-            audio = recognizer.record(source)
+        # Debug: Print the language being used
+        lang = self.config.get('language', 'en-US')
+        print(f"[DEBUG] Google ASR using language: {lang}")
 
-        text = recognizer.recognize_google(audio, language=self.config['language'])
+        try:
+            with sr.AudioFile(self.audio_file) as source:
+                # Adjust for ambient noise
+                recognizer.adjust_for_ambient_noise(source, duration=0.5)
+                audio = recognizer.record(source)
 
-        return {'text': text, 'metadata': {}}
+            # Try to recognize - the free API doesn't support model selection
+            # Note: model parameter only works with recognize_google_cloud (requires API key)
+            try:
+                text = recognizer.recognize_google(audio, language=lang)
+                print(f"[DEBUG] Google ASR recognized: {text}")
+            except sr.UnknownValueError as e:
+                # Speech was not understood - this is common for test audio
+                # Return empty text instead of failing
+                print(f"[DEBUG] Google ASR UnknownValueError: {e}")
+                text = ""
+            except sr.RequestError as e:
+                raise Exception(f"Google Speech Recognition API error: {str(e)}")
+            except Exception as e:
+                raise Exception(f"Recognition failed: {str(e)}")
+
+            return {'text': text, 'metadata': {}}
+
+        except sr.UnknownValueError:
+            # Could not understand audio - return empty for connection test
+            return {'text': '', 'metadata': {}}
+        except sr.RequestError as e:
+            raise Exception(f"Google Speech Recognition connection error: {str(e)}")
 
     def whisper_asr(self):
         """OpenAI Whisper implementation"""
