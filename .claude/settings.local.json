@@ -9,7 +9,18 @@
       "Bash(pip show:*)",
       "Bash(pip-audit:*)",
       "Bash(pip install:*)",
-      "Bash(pip search:*)"
+      "Bash(pip search:*)",
+      "Bash(cd:*)",
+      "Bash(cd /f/Work/Python/STT/ASR_Language_Training_EX && python -m py_compile main.py ui/main_window.py ui/flashcards.py core/asr_engines.py core/tts_engines.py core/recorder.py utils/storage.py utils/text_processing.py config.py 2>&1)",
+      "Bash(cd /f/Work/Python/STT/ASR_Language_Training_EX && python -c \"from ui.flashcards import FlashcardDialog, FlashcardProgress, FlashcardStatsDialog, FlashcardSettingsDialog; print\\('Flashcard imports OK'\\)\" 2>&1)",
+      "Bash(cd /f/Work/Python/STT/ASR_Language_Training_EX && python -c \"\nfrom ui.flashcards import FlashcardDialog\nmethods = ['init_ui', 'start_session', 'reset_session', 'show_card', 'flip_card', 'rate_difficulty', 'next_card', 'previous_card', 'update_stats', 'play_tts', 'play_slow_tts', 'toggle_pronunciation', 'toggle_recording', 'play_user_recording', 'show_settings', 'show_statistics', 'show_help', 'finish_session']\nfor m in methods:\n    if hasattr\\(FlashcardDialog, m\\):\n        print\\(f'OK: {m}'\\)\n    else:\n        print\\(f'MISSING: {m}'\\)\n\" 2>&1)",
+      "Bash(cd /f/Work/Python/STT/ASR_Language_Training_EX && python -c \"\n# Test full app import\nfrom ui.main_window import ASRApp\nfrom ui.flashcards import FlashcardDialog, FlashcardProgress, FlashcardStatsDialog, FlashcardSettingsDialog\nprint\\('All imports successful'\\)\n\" 2>&1)",
+      "Bash(cd /f/Work/Python/STT/ASR_Language_Training_EX && python -c \"\nfrom utils.storage import load_vocabulary_from_zip, load_csv, SessionStorage\nprint\\('Storage imports OK'\\)\n\" 2>&1)",
+      "Bash(head:*)",
+      "Bash(cd /f/Work/Python/STT/ASR_Language_Training_EX && python -c \"\nimport os\nos.environ['QT_QPA_PLATFORM'] = 'offscreen'\nfrom PyQt5.QtWidgets import QApplication\nprint\\('Qt offscreen test'\\)\napp = QApplication\\([]\\)\nprint\\('QApplication created successfully'\\)\n\" 2>&1)",
+      "Bash(cd /f/Work/Python/STT/ASR_Language_Training_EX && python -c \"\nfrom ui.flashcards import FlashcardDialog\nimport traceback\ntry:\n    print\\('Testing FlashcardDialog import... OK'\\)\nexcept Exception as e:\n    traceback.print_exc\\(\\)\n\" 2>&1)",
+      "Bash(cd /f/Work/Python/STT/ASR_Language_Training_EX && python -c \"\nfrom ui.flashcards import FlashcardDialog\nimport traceback\n\n# Create sample vocab data\nvocab_data = [\n    {'reference': 'hello', 'definition': 'χαιρετισμός', 'ipa_pronunciation': 'həˈləʊ'},\n    {'reference': 'apple', 'definition': 'μήλο', 'ipa_pronunciation': 'æpəl'}\n]\n\nconfig = {'language': 'en-US'}\n\ntry:\n    print\\('Creating dialog in offscreen mode...'\\)\n    import os\n    os.environ['QT_QPA_PLATFORM'] = 'offscreen'\n    \n    from PyQt5.QtWidgets import QApplication\n    app = QApplication\\([]\\)\n    \n    dialog = FlashcardDialog\\(vocab_data, config\\)\n    print\\('FlashcardDialog created successfully'\\)\nexcept Exception as e:\n    print\\(f'Error: {e}'\\)\n    traceback.print_exc\\(\\)\n\" 2>&1)",
+      "Bash(cd /f/Work/Python/STT/ASR_Language_Training_EX && python -c \"\nimport os\nos.environ['QT_QPA_PLATFORM'] = 'offscreen'\nfrom PyQt5.QtWidgets import QApplication\n\nvocab_data = [\n    {'reference': 'hello', 'definition': 'χαιρετισμός', 'ipa_pronunciation': 'həˈləʊ'},\n    {'reference': 'apple', 'definition': 'μήλο', 'ipa_pronunciation': 'æpəl'}\n]\nconfig = {'language': 'en-US'}\n\napp = QApplication\\([]\\)\nfrom ui.flashcards import FlashcardDialog\ndialog = FlashcardDialog\\(vocab_data, config\\)\nprint\\('FlashcardDialog created successfully!'\\)\nprint\\(f'Shuffle cards: {dialog.shuffle_cards}'\\)\n\" 2>&1)"
     ]
   }
 }

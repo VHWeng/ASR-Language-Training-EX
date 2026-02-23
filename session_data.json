@@ -1,5 +1,5 @@
 {
-  "last_saved": "2026-02-21T21:42:59.185162",
+  "last_saved": "2026-02-22T17:21:10.580254",
   "sessions": [
     {
       "timestamp": "2026-02-18T19:18:43.273188",
@@ -687,6 +687,206 @@
         "reference": "νόμος",
         "recognized": "μας",
         "accuracy": 50.0
+      }
+    },
+    {
+      "timestamp": "2026-02-22T14:53:26.256370",
+      "data": {
+        "reference": "ἀλλά",
+        "recognized": "αλλά",
+        "accuracy": 100.0
+      }
+    },
+    {
+      "timestamp": "2026-02-22T15:22:45.435269",
+      "data": {
+        "reference": "ἀπό",
+        "recognized": "από",
+        "accuracy": 100.0
+      }
+    },
+    {
+      "timestamp": "2026-02-22T15:23:13.586126",
+      "data": {
+        "reference": "ἔτι",
+        "recognized": "έτη",
+        "accuracy": 66.66666666666666
+      }
+    },
+    {
+      "timestamp": "2026-02-22T15:23:25.139226",
+      "data": {
+        "reference": "ἔχω τήν",
+        "recognized": "έχουν",
+        "accuracy": 50.0
+      }
+    },
+    {
+      "timestamp": "2026-02-22T15:23:38.929662",
+      "data": {
+        "reference": "ἡ κλίνη",
+        "recognized": "η κλείνει",
+        "accuracy": 75.0
+      }
+    },
+    {
+      "timestamp": "2026-02-22T15:23:56.767328",
+      "data": {
+        "reference": "ἡ νεφέλη",
+        "recognized": "η νέα θέλει",
+        "accuracy": 63.1578947368421
+      }
+    },
+    {
+      "timestamp": "2026-02-22T15:24:11.281663",
+      "data": {
+        "reference": "ἡ στολή",
+        "recognized": "η στολή",
+        "accuracy": 100.0
+      }
+    },
+    {
+      "timestamp": "2026-02-22T15:24:28.541309",
+      "data": {
+        "reference": "κρύπτω τήν",
+        "recognized": "cryptoting",
+        "accuracy": 0.0
+      }
+    },
+    {
+      "timestamp": "2026-02-22T15:24:34.927748",
+      "data": {
+        "reference": "κρύπτω τήν",
+        "recognized": "cryptothing",
+        "accuracy": 0.0
+      }
+    },
+    {
+      "timestamp": "2026-02-22T15:24:40.016953",
+      "data": {
+        "reference": "κρύπτω τήν",
+        "recognized": "",
+        "accuracy": 0.0
+      }
+    },
+    {
+      "timestamp": "2026-02-22T15:24:44.839523",
+      "data": {
+        "reference": "κρύπτω τήν",
+        "recognized": "",
+        "accuracy": 0.0
+      }
+    },
+    {
+      "timestamp": "2026-02-22T15:24:49.652987",
+      "data": {
+        "reference": "κρύπτω τήν",
+        "recognized": "correctothing",
+        "accuracy": 0.0
+      }
+    },
+    {
+      "timestamp": "2026-02-22T15:25:07.275148",
+      "data": {
+        "reference": "λύω τήν",
+        "recognized": "λιοσίων",
+        "accuracy": 42.857142857142854
+      }
+    },
+    {
+      "timestamp": "2026-02-22T15:25:16.582084",
+      "data": {
+        "reference": "ὁ ἄγγελος",
+        "recognized": "έγκυος",
+        "accuracy": 40.0
+      }
+    },
+    {
+      "timestamp": "2026-02-22T15:26:24.589428",
+      "data": {
+        "reference": "ἄρτος",
+        "recognized": "aut",
+        "accuracy": 0.0
+      }
+    },
+    {
+      "timestamp": "2026-02-22T15:26:37.527087",
+      "data": {
+        "reference": "βῆμα",
+        "recognized": "βήμα",
+        "accuracy": 100.0
+      }
+    },
+    {
+      "timestamp": "2026-02-22T15:26:47.299891",
+      "data": {
+        "reference": "βίβλος",
+        "recognized": "βιβλίου",
+        "accuracy": 76.92307692307693
+      }
+    },
+    {
+      "timestamp": "2026-02-22T15:26:53.954548",
+      "data": {
+        "reference": "βίβλος",
+        "recognized": "fiables",
+        "accuracy": 0.0
+      }
+    },
+    {
+      "timestamp": "2026-02-22T15:26:58.003254",
+      "data": {
+        "reference": "βίβλος",
+        "recognized": "φέτος",
+        "accuracy": 36.36363636363637
+      }
+    },
+    {
+      "timestamp": "2026-02-22T15:28:04.524736",
+      "data": {
+        "reference": "ἀλλά",
+        "recognized": "αλλά",
+        "accuracy": 100.0
+      }
+    },
+    {
+      "timestamp": "2026-02-22T15:28:11.248295",
+      "data": {
+        "reference": "ἀπό",
+        "recognized": "tapo",
+        "accuracy": 0.0
+      }
+    },
+    {
+      "timestamp": "2026-02-22T15:28:17.622262",
+      "data": {
+        "reference": "ἀπό",
+        "recognized": "apple",
+        "accuracy": 0.0
+      }
+    },
+    {
+      "timestamp": "2026-02-22T17:20:57.049452",
+      "data": {
+        "reference": "ἀλλά",
+        "recognized": "αλλά",
+        "accuracy": 100.0
+      }
+    },
+    {
+      "timestamp": "2026-02-22T17:21:04.014289",
+      "data": {
+        "reference": "ἀπό",
+        "recognized": "apple",
+        "accuracy": 0.0
+      }
+    },
+    {
+      "timestamp": "2026-02-22T17:21:10.580254",
+      "data": {
+        "reference": "γάρ",
+        "recognized": "car",
+        "accuracy": 0.0
       }
     }
   ]

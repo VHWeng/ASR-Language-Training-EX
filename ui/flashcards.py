@@ -4,6 +4,7 @@ Provides spaced repetition learning with progress tracking
 """
 
 import json
+import os
 import random
 from datetime import datetime, timedelta
 from PyQt5.QtWidgets import (
@@ -12,7 +13,7 @@ from PyQt5.QtWidgets import (
     QMessageBox, QDialog, QDialogButtonBox, QComboBox
 )
 from PyQt5.QtCore import Qt, pyqtSignal, QTimer
-from PyQt5.QtGui import QFont
+from PyQt5.QtGui import QFont, QPixmap
 
 
 class FlashcardSession:
@@ -191,121 +192,213 @@ class FlashcardDialog(QDialog):
     def init_ui(self):
         layout = QVBoxLayout()
 
-        # Session stats
-        stats_group = QGroupBox("Session Progress")
-        stats_layout = QHBoxLayout()
+        # Session stats bar
+        stats_bar_layout = QHBoxLayout()
 
         self.progress_label = QLabel("Card: 0/0")
         self.accuracy_label = QLabel("Accuracy: 0%")
         self.streak_label = QLabel("Streak: 0")
 
-        stats_layout.addWidget(self.progress_label)
-        stats_layout.addWidget(self.accuracy_label)
-        stats_layout.addWidget(self.streak_label)
-        stats_group.setLayout(stats_layout)
-        layout.addWidget(stats_group)
+        stats_bar_layout.addWidget(self.progress_label)
+        stats_bar_layout.addWidget(self.accuracy_label)
+        stats_bar_layout.addWidget(self.streak_label)
+        stats_bar_layout.addStretch()
 
-        # Card display
-        self.card_group = QGroupBox("Flashcard")
-        card_layout = QVBoxLayout()
+        layout.addLayout(stats_bar_layout)
 
-        self.card_text = QTextEdit()
-        self.card_text.setReadOnly(True)
-        self.card_text.setAlignment(Qt.AlignCenter)
-        self.card_text.setFont(QFont("Arial", 24))
-        self.card_text.setStyleSheet("""
-            QTextEdit {
-                background-color: #f0f0f0;
-                border: 2px solid #ccc;
-                border-radius: 10px;
-            }
-        """)
-        card_layout.addWidget(self.card_text)
+        # Front Card Layout
+        self.front_card_group = QWidget()
+        front_card_layout = QVBoxLayout()
+        front_card_layout.setContentsMargins(10, 10, 10, 10)
 
-        # Pronunciation display
+        # Top right controls for front card
+        front_top_layout = QHBoxLayout()
+        front_top_layout.addStretch()
+        self.front_config_btn = QPushButton("⚙️")
+        self.front_config_btn.setFixedSize(30, 30)
+        self.front_config_btn.setToolTip("Configuration")
+        self.front_config_btn.clicked.connect(self.show_settings)
+        front_top_layout.addWidget(self.front_config_btn)
+
+        self.front_stats_btn = QPushButton("📊")
+        self.front_stats_btn.setFixedSize(30, 30)
+        self.front_stats_btn.setToolTip("Statistics")
+        self.front_stats_btn.clicked.connect(self.show_statistics)
+        front_top_layout.addWidget(self.front_stats_btn)
+
+        self.front_help_btn = QPushButton("?")
+        self.front_help_btn.setFixedSize(30, 30)
+        self.front_help_btn.setToolTip("Help")
+        self.front_help_btn.clicked.connect(self.show_help)
+        front_top_layout.addWidget(self.front_help_btn)
+
+        front_card_layout.addLayout(front_top_layout)
+
+        # Top Center: Word/Phrase
+        self.front_word_label = QLabel("Word/Phrase")
+        self.front_word_label.setAlignment(Qt.AlignCenter)
+        self.front_word_label.setFont(QFont("Arial", 24, QFont.Bold))
+        front_card_layout.addWidget(self.front_word_label)
+
+        # Under Word/Phrase: TTS buttons
+        tts_layout = QHBoxLayout()
+
+        self.play_tts_btn = QPushButton("🔊 Play")
+        self.play_tts_btn.clicked.connect(self.play_tts)
+        tts_layout.addWidget(self.play_tts_btn)
+
+        self.play_slow_tts_btn = QPushButton("🐛 Slow")
+        self.play_slow_tts_btn.clicked.connect(self.play_slow_tts)
+        tts_layout.addWidget(self.play_slow_tts_btn)
+
+        front_card_layout.addLayout(tts_layout)
+
+        # Under TTS: Pronunciation toggle and display
+        pron_layout = QHBoxLayout()
+
+        self.show_pronunciation_cb = QCheckBox("Show Pronunciation")
+        self.show_pronunciation_cb.stateChanged.connect(self.toggle_pronunciation)
+        pron_layout.addWidget(self.show_pronunciation_cb)
+
         self.pronunciation_label = QLabel()
         self.pronunciation_label.setAlignment(Qt.AlignCenter)
         self.pronunciation_label.setFont(QFont("Arial", 14))
-        card_layout.addWidget(self.pronunciation_label)
+        self.pronunciation_label.hide()
+        pron_layout.addWidget(self.pronunciation_label)
 
-        # Flip button
-        self.flip_btn = QPushButton("Flip Card (Space)")
-        self.flip_btn.setShortcut("Space")
-        self.flip_btn.clicked.connect(self.flip_card)
-        card_layout.addWidget(self.flip_btn)
+        front_card_layout.addLayout(pron_layout)
 
-        self.card_group.setLayout(card_layout)
-        layout.addWidget(self.card_group)
+        # Center: Image display
+        self.image_label = QLabel()
+        self.image_label.setAlignment(Qt.AlignCenter)
+        self.image_label.setScaledContents(True)
+        self.image_label.setMinimumSize(200, 200)
+        front_card_layout.addWidget(self.image_label)
 
-        # Control buttons
-        control_layout = QHBoxLayout()
+        # Under Image: Recording controls
+        record_layout = QHBoxLayout()
+
+        self.record_btn = QPushButton("🎤 Record")
+        self.record_btn.setStyleSheet("background-color: #ff4444;")
+        self.record_btn.setCheckable(True)
+        self.record_btn.clicked.connect(self.toggle_recording)
+        record_layout.addWidget(self.record_btn)
+
+        self.playback_btn = QPushButton("▶ Playback")
+        self.playback_btn.clicked.connect(self.play_user_recording)
+        self.playback_btn.setEnabled(False)
+        record_layout.addWidget(self.playback_btn)
+
+        front_card_layout.addLayout(record_layout)
+
+        # Bottom Center: Navigation
+        nav_layout = QHBoxLayout()
 
         self.prev_btn = QPushButton("◀ Previous")
+        self.prev_btn.setStyleSheet("background-color: #4CAF50; color: white; font-weight: bold; padding: 10px;")
         self.prev_btn.clicked.connect(self.previous_card)
-        control_layout.addWidget(self.prev_btn)
+        nav_layout.addWidget(self.prev_btn)
 
-        self.play_tts_btn = QPushButton("🔊 Play Pronunciation")
-        self.play_tts_btn.clicked.connect(self.play_tts)
-        control_layout.addWidget(self.play_tts_btn)
+        self.flip_btn = QPushButton("Show ▶")
+        self.flip_btn.setStyleSheet("background-color: #2196F3; color: white; font-weight: bold; padding: 10px;")
+        self.flip_btn.setShortcut("Space")
+        self.flip_btn.clicked.connect(self.flip_card)
+        nav_layout.addWidget(self.flip_btn)
 
-        self.record_btn = QPushButton("🎤 Practice Pronunciation")
-        self.record_btn.clicked.connect(self.practice_pronunciation)
-        control_layout.addWidget(self.record_btn)
+        nav_layout.addStretch()
+        front_card_layout.addLayout(nav_layout)
 
-        self.next_btn = QPushButton("Next ▶")
-        self.next_btn.clicked.connect(self.next_card)
-        control_layout.addWidget(self.next_btn)
+        self.front_card_group.setLayout(front_card_layout)
+        layout.addWidget(self.front_card_group)
 
-        layout.addLayout(control_layout)
+        # Spacer
+        layout.addSpacing(10)
 
-        # Difficulty rating (shown after flip)
-        self.difficulty_group = QGroupBox("How well did you know this?")
-        difficulty_layout = QHBoxLayout()
+        # Back Card Layout (hidden initially)
+        self.back_card_group = QWidget()
+        back_card_layout = QVBoxLayout()
+        back_card_layout.setContentsMargins(10, 10, 10, 10)
 
-        self.again_btn = QPushButton("Again")
-        self.again_btn.setStyleSheet("background-color: #ff6b6b;")
-        self.again_btn.clicked.connect(lambda: self.rate_difficulty(1))
+        # Top right controls for back card
+        back_top_layout = QHBoxLayout()
+        back_top_layout.addStretch()
+        self.back_config_btn = QPushButton("⚙️")
+        self.back_config_btn.setFixedSize(30, 30)
+        self.back_config_btn.setToolTip("Configuration")
+        self.back_config_btn.clicked.connect(self.show_settings)
+        back_top_layout.addWidget(self.back_config_btn)
 
-        self.hard_btn = QPushButton("Hard")
-        self.hard_btn.setStyleSheet("background-color: #ffa500;")
-        self.hard_btn.clicked.connect(lambda: self.rate_difficulty(2))
+        self.back_stats_btn = QPushButton("📊")
+        self.back_stats_btn.setFixedSize(30, 30)
+        self.back_stats_btn.setToolTip("Statistics")
+        self.back_stats_btn.clicked.connect(self.show_statistics)
+        back_top_layout.addWidget(self.back_stats_btn)
 
-        self.good_btn = QPushButton("Good")
-        self.good_btn.setStyleSheet("background-color: #4ecdc4;")
-        self.good_btn.clicked.connect(lambda: self.rate_difficulty(3))
+        self.back_help_btn = QPushButton("?")
+        self.back_help_btn.setFixedSize(30, 30)
+        self.back_help_btn.setToolTip("Help")
+        self.back_help_btn.clicked.connect(self.show_help)
+        back_top_layout.addWidget(self.back_help_btn)
 
-        self.easy_btn = QPushButton("Easy")
-        self.easy_btn.setStyleSheet("background-color: #95e1d3;")
-        self.easy_btn.clicked.connect(lambda: self.rate_difficulty(4))
+        back_card_layout.addLayout(back_top_layout)
 
-        difficulty_layout.addWidget(self.again_btn)
-        difficulty_layout.addWidget(self.hard_btn)
-        difficulty_layout.addWidget(self.good_btn)
-        difficulty_layout.addWidget(self.easy_btn)
+        # Top Center: Word/Phrase (same as front)
+        self.back_word_label = QLabel("Word/Phrase")
+        self.back_word_label.setAlignment(Qt.AlignCenter)
+        self.back_word_label.setFont(QFont("Arial", 24, QFont.Bold))
+        back_card_layout.addWidget(self.back_word_label)
 
-        self.difficulty_group.setLayout(difficulty_layout)
-        self.difficulty_group.hide()  # Hidden until card is flipped
-        layout.addWidget(self.difficulty_group)
+        # Under Word/Phrase: Pronunciation (always visible)
+        self.back_pronunciation_label = QLabel()
+        self.back_pronunciation_label.setAlignment(Qt.AlignCenter)
+        self.back_pronunciation_label.setFont(QFont("Arial", 14))
+        back_card_layout.addWidget(self.back_pronunciation_label)
 
-        # Settings
-        settings_group = QGroupBox("Mode Settings")
-        settings_layout = QVBoxLayout()
+        # Under Pronunciation: Definition/Translation
+        self.definition_text = QTextEdit()
+        self.definition_text.setReadOnly(True)
+        self.definition_text.setAlignment(Qt.AlignCenter)
+        self.definition_text.setFont(QFont("Arial", 16))
+        self.definition_text.setMinimumSize(300, 100)
+        back_card_layout.addWidget(self.definition_text)
 
-        self.show_first_combo = QComboBox()
-        self.show_first_combo.addItems(["Show Word First", "Show Definition First"])
-        self.show_first_combo.currentTextChanged.connect(self.reset_session)
-        settings_layout.addWidget(self.show_first_combo)
+        # Under Definition: Pronunciation Feedback
+        feedback_layout = QHBoxLayout()
 
-        self.shuffle_cb = QCheckBox("Shuffle Cards")
-        self.shuffle_cb.stateChanged.connect(self.reset_session)
-        settings_layout.addWidget(self.shuffle_cb)
+        self.feedback_label = QLabel("Pronunciation: ")
+        feedback_layout.addWidget(self.feedback_label)
 
-        self.repeat_incorrect_cb = QCheckBox("Repeat Incorrect Cards")
-        self.repeat_incorrect_cb.setChecked(True)
-        settings_layout.addWidget(self.repeat_incorrect_cb)
+        self.feedback_progress = QProgressBar()
+        self.feedback_progress.setMinimum(0)
+        self.feedback_progress.setMaximum(100)
+        self.feedback_progress.setValue(0)
+        feedback_layout.addWidget(self.feedback_progress)
 
-        settings_group.setLayout(settings_layout)
-        layout.addWidget(settings_group)
+        back_card_layout.addLayout(feedback_layout)
+
+        # Bottom: Rating buttons
+        rating_layout = QHBoxLayout()
+
+        self.unknown_btn = QPushButton("Unknown")
+        self.unknown_btn.setStyleSheet("background-color: #f44336; color: white; font-weight: bold; padding: 10px;")
+        self.unknown_btn.clicked.connect(lambda: self.rate_difficulty(1))
+        rating_layout.addWidget(self.unknown_btn)
+
+        self.partial_btn = QPushButton("Partially Known")
+        self.partial_btn.setStyleSheet("background-color: #FFC107; color: black; font-weight: bold; padding: 10px;")
+        self.partial_btn.clicked.connect(lambda: self.rate_difficulty(2))
+        rating_layout.addWidget(self.partial_btn)
+
+        self.know_btn = QPushButton("Know")
+        self.know_btn.setStyleSheet("background-color: #4CAF50; color: white; font-weight: bold; padding: 10px;")
+        self.know_btn.clicked.connect(lambda: self.rate_difficulty(3))
+        rating_layout.addWidget(self.know_btn)
+
+        back_card_layout.addLayout(rating_layout)
+
+        self.back_card_group.setLayout(back_card_layout)
+        self.back_card_group.hide()
+        layout.addWidget(self.back_card_group)
 
         # Close button
         button_box = QDialogButtonBox(QDialogButtonBox.Close)
@@ -314,10 +407,16 @@ class FlashcardDialog(QDialog):
 
         self.setLayout(layout)
 
+        # Settings dialog (created on demand)
+        self.settings_dialog = None
+
+        # Session settings (defaults)
+        self.shuffle_cards = True
+
     def start_session(self):
         """Initialize a new flashcard session"""
         vocab = self.vocab_data.copy()
-        if self.shuffle_cb.isChecked():
+        if self.shuffle_cards:
             random.shuffle(vocab)
 
         self.session = FlashcardSession(vocab)
@@ -332,44 +431,63 @@ class FlashcardDialog(QDialog):
     def show_card(self):
         """Display the current card"""
         if not self.vocab_data or self.current_card >= len(self.vocab_data):
-            self.card_text.setText("Session Complete!")
+            self.front_word_label.setText("Session Complete!")
+            self.front_card_group.hide()
+            self.back_card_group.hide()
             self.finish_session()
             return
 
         item = self.vocab_data[self.current_card]
         self.showing_front = True
-        self.difficulty_group.hide()
+        self.front_card_group.show()
+        self.back_card_group.hide()
 
-        show_word_first = "Word" in self.show_first_combo.currentText()
+        # Show front card with word/phrase
+        front = item.get('reference', 'N/A')
+        self.front_word_label.setText(front)
+        self.pronunciation_label.setText(item.get('ipa_pronunciation', ''))
 
-        if show_word_first:
-            front = item.get('reference', 'N/A')
-            back = item.get('definition', 'No definition')
+        # Handle image display
+        image_path = item.get('image_filename', '')
+        if image_path and os.path.exists(image_path):
+            pixmap = QPixmap(image_path)
+            self.image_label.setPixmap(pixmap)
         else:
-            front = item.get('definition', 'No definition')
-            back = item.get('reference', 'N/A')
+            self.image_label.clear()
 
-        self.card_text.setText(f"{front}")
-        self.flip_btn.setText("Flip Card (Space)")
+        # Reset pronunciation checkbox
+        self.show_pronunciation_cb.setChecked(False)
+        self.pronunciation_label.hide()
 
-        # Store back content for flip
-        self.current_back = back
+        self.flip_btn.setText("Show ▶")
+        self.flip_btn.setEnabled(True)
+        self.playback_btn.setEnabled(False)
+        self.record_btn.setEnabled(True)
+        self.record_btn.setChecked(False)
+
+        # Store item for flip
+        self.current_item = item
 
     def flip_card(self):
-        """Flip the card to show the other side"""
-        if self.showing_front:
-            self.card_text.setText(f"{self.card_text.toPlainText()}\n\n{'='*40}\n\n{self.current_back}")
+        """Flip the card to show the back side"""
+        if self.showing_front and self.current_item:
+            item = self.current_item
             self.showing_front = False
-            self.flip_btn.setText("Show Answer")
-            self.difficulty_group.show()
 
-            # Show pronunciation if available
-            if self.current_card < len(self.vocab_data):
-                item = self.vocab_data[self.current_card]
-                ipa = item.get('ipa_pronunciation', '')
-                if ipa:
-                    self.pronunciation_label.setText(f"IPA: {ipa}")
+            # Show back card
+            self.front_card_group.hide()
+            self.back_card_group.show()
+
+            # Update back card content
+            self.back_word_label.setText(item.get('reference', 'N/A'))
+            self.back_pronunciation_label.setText(item.get('ipa_pronunciation', ''))
+            self.definition_text.setText(item.get('definition', 'No definition'))
+
+            # Reset feedback
+            self.feedback_progress.setValue(0)
+            self.feedback_label.setText("Pronunciation: ")
         else:
+            # Go back to front
             self.show_card()
 
     def rate_difficulty(self, rating):
@@ -413,6 +531,80 @@ class FlashcardDialog(QDialog):
         # TODO: Implement TTS playback
         # This will integrate with the TTS engines from core.tts_engines
         pass
+
+    def play_slow_tts(self):
+        """Play TTS slowly for the current card"""
+        # TODO: Implement slow TTS playback
+        pass
+
+    def toggle_pronunciation(self, state):
+        """Toggle pronunciation visibility"""
+        if state == Qt.Checked:
+            self.pronunciation_label.show()
+        else:
+            self.pronunciation_label.hide()
+
+    def toggle_recording(self):
+        """Toggle recording mode"""
+        # TODO: Implement recording functionality
+        pass
+
+    def play_user_recording(self):
+        """Play back user recording"""
+        # TODO: Implement playback functionality
+        pass
+
+    def show_settings(self):
+        """Show settings dialog"""
+        if self.settings_dialog is None:
+            self.settings_dialog = FlashcardSettingsDialog(self.config, self)
+            self.settings_dialog.settings_changed.connect(self.apply_settings)
+            self.settings_dialog.settings_changed.connect(self.reset_session)
+        self.settings_dialog.show()
+
+    def apply_settings(self):
+        """Apply settings from settings dialog"""
+        if self.settings_dialog:
+            self.shuffle_cards = self.settings_dialog.shuffle_cb.isChecked()
+
+    def show_statistics(self):
+        """Show statistics dialog"""
+        stats_dialog = FlashcardStatsDialog(self.progress, self)
+        stats_dialog.exec_()
+
+    def show_help(self):
+        """Show help information"""
+        help_text = """
+        <h2>Flashcard Mode Help</h2>
+        <p><b>Front Card:</b></p>
+        <ul>
+            <li>View the word/phrase</li>
+            <li>Click 🔊 to hear pronunciation</li>
+            <li>Click 🐛 for slow pronunciation</li>
+            <li>Check "Show Pronunciation" to see IPA</li>
+            <li>Record your pronunciation with 🎤</li>
+            <li>Click "Show" to see the answer</li>
+        </ul>
+        <p><b>Back Card:</b></p>
+        <ul>
+            <li>View the definition/translation</li>
+            <li>See pronunciation feedback</li>
+            <li>Rate your knowledge:</li>
+            <li>🟢 Know - You knew it well</li>
+            <li>🟡 Partially Known - Somewhat familiar</li>
+            <li>🔴 Unknown - Didn't know it</li>
+        </ul>
+        <p><b>Navigation:</b></p>
+        <ul>
+            <li>Click "Previous" to go back</li>
+            <li>Use Space key to flip card</li>
+        </ul>
+        """
+        msg = QMessageBox(self)
+        msg.setWindowTitle("Flashcard Help")
+        msg.setTextFormat(Qt.RichText)
+        msg.setText(help_text)
+        msg.exec_()
 
     def practice_pronunciation(self):
         """Open pronunciation practice for current card"""
@@ -468,3 +660,48 @@ class FlashcardStatsDialog(QDialog):
         layout.addWidget(button_box)
 
         self.setLayout(layout)
+
+
+class FlashcardSettingsDialog(QDialog):
+    """Settings dialog for flashcard mode"""
+
+    settings_changed = pyqtSignal()
+
+    def __init__(self, config, parent=None):
+        super().__init__(parent)
+        self.config = config
+        self.setWindowTitle("Flashcard Settings")
+        self.init_ui()
+
+    def init_ui(self):
+        layout = QVBoxLayout()
+
+        # Show first option
+        show_first_layout = QHBoxLayout()
+        show_first_layout.addWidget(QLabel("Show First:"))
+        self.show_first_combo = QComboBox()
+        self.show_first_combo.addItems(["Word/Phrase", "Definition/Translation"])
+        show_first_layout.addWidget(self.show_first_combo)
+        layout.addLayout(show_first_layout)
+
+        # Shuffle option
+        self.shuffle_cb = QCheckBox("Shuffle Cards")
+        self.shuffle_cb.setChecked(True)
+        layout.addWidget(self.shuffle_cb)
+
+        # Repeat incorrect
+        self.repeat_incorrect_cb = QCheckBox("Repeat Incorrect Cards")
+        self.repeat_incorrect_cb.setChecked(True)
+        layout.addWidget(self.repeat_incorrect_cb)
+
+        # Buttons
+        button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        button_box.accepted.connect(self.save_and_close)
+        button_box.rejected.connect(self.reject)
+        layout.addWidget(button_box)
+
+        self.setLayout(layout)
+
+    def save_and_close(self):
+        self.settings_changed.emit()
+        self.accept()
