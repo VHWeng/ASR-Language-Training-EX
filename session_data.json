@@ -1,5 +1,5 @@
 {
-  "last_saved": "2026-02-22T17:21:10.580254",
+  "last_saved": "2026-02-23T04:54:50.988469",
   "sessions": [
     {
       "timestamp": "2026-02-18T19:18:43.273188",
@@ -887,6 +887,70 @@
         "reference": "γάρ",
         "recognized": "car",
         "accuracy": 0.0
+      }
+    },
+    {
+      "timestamp": "2026-02-23T04:53:53.206984",
+      "data": {
+        "reference": "ἀλλά",
+        "recognized": "",
+        "accuracy": 0.0
+      }
+    },
+    {
+      "timestamp": "2026-02-23T04:53:59.257027",
+      "data": {
+        "reference": "ἀλλά",
+        "recognized": "αλλά",
+        "accuracy": 100.0
+      }
+    },
+    {
+      "timestamp": "2026-02-23T04:54:14.245268",
+      "data": {
+        "reference": "ἀπό",
+        "recognized": "apple",
+        "accuracy": 0.0
+      }
+    },
+    {
+      "timestamp": "2026-02-23T04:54:19.418915",
+      "data": {
+        "reference": "ἀπό",
+        "recognized": "apple",
+        "accuracy": 0.0
+      }
+    },
+    {
+      "timestamp": "2026-02-23T04:54:25.489937",
+      "data": {
+        "reference": "ἀπό",
+        "recognized": "ap",
+        "accuracy": 0.0
+      }
+    },
+    {
+      "timestamp": "2026-02-23T04:54:30.627937",
+      "data": {
+        "reference": "ἀπό",
+        "recognized": "apple",
+        "accuracy": 0.0
+      }
+    },
+    {
+      "timestamp": "2026-02-23T04:54:38.549816",
+      "data": {
+        "reference": "γάρ",
+        "recognized": "car",
+        "accuracy": 0.0
+      }
+    },
+    {
+      "timestamp": "2026-02-23T04:54:50.988469",
+      "data": {
+        "reference": "δέ",
+        "recognized": "δεη",
+        "accuracy": 80.0
       }
     }
   ]

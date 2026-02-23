@@ -200,6 +200,12 @@ class FlashcardDialog(QDialog):
         self.record_thread = None
         self.recorded_file = None
         self.audio_file = None
+        
+        # Initialize ASR attributes for pronunciation feedback
+        from core.asr_engines import ASRThread
+        self.asr_thread = None
+        self.pronunciation_data = None
+        self.has_pronunciation_feedback = False
 
         self.setWindowTitle("Flashcard Mode")
         self.setMinimumSize(600, 500)
@@ -392,6 +398,15 @@ class FlashcardDialog(QDialog):
         feedback_layout.addWidget(self.feedback_progress)
 
         back_card_layout.addLayout(feedback_layout)
+        
+        # Detailed pronunciation feedback text box
+        self.pronunciation_feedback_text = QTextEdit()
+        self.pronunciation_feedback_text.setReadOnly(True)
+        self.pronunciation_feedback_text.setMinimumHeight(150)
+        self.pronunciation_feedback_text.setMaximumHeight(200)
+        self.pronunciation_feedback_text.setFont(QFont("Consolas", 10))
+        back_card_layout.addWidget(self.pronunciation_feedback_text)
+        self.pronunciation_feedback_text.hide()  # Initially hidden until feedback is available
 
         # Bottom: Rating buttons
         rating_layout = QHBoxLayout()
@@ -500,9 +515,20 @@ class FlashcardDialog(QDialog):
             self.back_pronunciation_label.setText(item.get('ipa_pronunciation', ''))
             self.definition_text.setText(item.get('definition', 'No definition'))
 
-            # Reset feedback
-            self.feedback_progress.setValue(0)
-            self.feedback_label.setText("Pronunciation: ")
+            # Only reset feedback if no pronunciation feedback exists yet
+            # Otherwise, preserve the existing pronunciation feedback
+            if not self.pronunciation_data:
+                self.feedback_progress.setValue(0)
+                self.feedback_label.setText("Pronunciation: ")
+                self.pronunciation_feedback_text.hide()
+            else:
+                # If we have pronunciation feedback, make sure it's visible
+                self.pronunciation_feedback_text.show()
+                
+                # Also make sure the progress bar shows the correct score
+                if self.pronunciation_data and 'accuracy' in self.pronunciation_data:
+                    accuracy = self.pronunciation_data['accuracy']
+                    self.feedback_progress.setValue(int(accuracy))
         else:
             # Go back to front
             self.show_card()
@@ -597,7 +623,10 @@ class FlashcardDialog(QDialog):
         # Update UI elements
         if hasattr(self, 'playback_btn'):
             self.playback_btn.setEnabled(True)
-
+        
+        # Automatically convert the recorded audio for pronunciation feedback
+        self.convert_audio_for_feedback()
+        
     def on_record_error(self, error_msg):
         """Handle recording errors"""
         print(f"Recording error: {error_msg}")
@@ -612,9 +641,136 @@ class FlashcardDialog(QDialog):
         try:
             data, samplerate = sf.read(self.audio_file)
             sd.play(data, samplerate)
+            
+            # After playing, automatically convert the audio for pronunciation feedback
+            self.convert_audio_for_feedback()
         except Exception as e:
             from PyQt5.QtWidgets import QMessageBox
             QMessageBox.critical(self, "Playback Error", str(e))
+
+    def convert_audio_for_feedback(self):
+        """Convert recorded audio to text and get pronunciation feedback"""
+        if not self.audio_file:
+            from PyQt5.QtWidgets import QMessageBox
+            QMessageBox.warning(self, "No Audio", "Please record audio first.")
+            return
+
+        # Get the reference text for comparison (the word/phrase on the flashcard)
+        if not self.current_item:
+            return
+
+        reference_text = self.current_item.get('reference', '').strip()
+        if not reference_text:
+            from PyQt5.QtWidgets import QMessageBox
+            QMessageBox.warning(self, "No Reference", "No reference text available for comparison.")
+            return
+
+        # Start ASR conversion with reference text for pronunciation feedback
+        from core.asr_engines import ASRThread
+        self.asr_thread = ASRThread(
+            self.audio_file,
+            self.config,
+            show_punctuation=True,
+            show_word_time=False,
+            reference_text=reference_text
+        )
+        self.asr_thread.finished.connect(self.on_asr_finished_for_feedback)
+        self.asr_thread.error.connect(self.on_asr_error)
+        self.asr_thread.start()
+
+    def on_asr_finished_for_feedback(self, text, metadata):
+        """Handle ASR completion and display pronunciation feedback"""
+        # Update the text display if needed
+        # Handle pronunciation feedback
+        if metadata and 'pronunciation' in metadata:
+            self.pronunciation_data = metadata['pronunciation']
+            self.display_pronunciation_feedback(metadata['pronunciation'])
+
+    def on_asr_error(self, error_msg):
+        """Handle ASR errors"""
+        print(f"ASR Error: {error_msg}")
+        from PyQt5.QtWidgets import QMessageBox
+        QMessageBox.critical(self, "ASR Error", f"Error processing audio: {error_msg}")
+
+    def display_pronunciation_feedback(self, pron_data):
+        """Display detailed pronunciation feedback similar to main window"""
+        accuracy = pron_data['accuracy']
+
+        # Make sure accuracy is a valid number between 0 and 100
+        accuracy = max(0, min(100, float(accuracy)))
+
+        # Update accuracy display on the progress bar
+        self.feedback_progress.setValue(int(accuracy))
+
+        # Color coding based on accuracy score
+        # Green >= 80%, Yellow 60% to 79%, Red < 60%
+        if accuracy >= 80:
+            color = "green"
+            status = "Excellent!"
+        elif accuracy >= 60:
+            color = "yellow"
+            status = "Good"
+        else:
+            color = "red"
+            status = "Needs Improvement"
+
+        # Update progress bar color (using stylesheet)
+        self.feedback_progress.setStyleSheet(f"""
+            QProgressBar {{
+                border: 2px solid grey;
+                border-radius: 5px;
+                text-align: center;
+                color: black;
+            }}
+            QProgressBar::chunk {{
+                background-color: {color};
+                width: 1px;
+            }}
+        """)
+
+        # Generate detailed feedback text
+        feedback = f"=== PRONUNCIATION FEEDBACK ===\n\n"
+        feedback += f"Overall Accuracy: {accuracy:.1f}% - {status}\n"
+        feedback += f"Threshold: 80%\n\n"
+        feedback += f"Reference: {pron_data['reference']}\n\n"
+        feedback += f"Recognized: {pron_data['recognized']}\n\n"
+        feedback += "=== WORD-BY-WORD ANALYSIS ===\n\n"
+
+        word_analysis = pron_data.get('word_analysis', [])
+        correct_count = 0
+
+        for i, word_info in enumerate(word_analysis, 1):
+            status = word_info['status']
+            ref = word_info['reference']
+            rec = word_info['recognized']
+            sim = word_info['similarity']
+
+            if status == "correct":
+                correct_count += 1
+                feedback += f"{i}. ✓ '{ref}' → '{rec}' ({sim:.1f}%)\n"
+            elif status == "incorrect":
+                feedback += f"{i}. ✗ '{ref}' → '{rec}' ({sim:.1f}%) - Mispronounced\n"
+            elif status == "missing":
+                feedback += f"{i}. ✗ '{ref}' → [MISSING]\n"
+            elif status == "extra":
+                feedback += f"{i}. ⚠ [EXTRA] → '{rec}'\n"
+
+        total = len(word_analysis)
+        feedback += f"\n=== SUMMARY ===\n"
+        feedback += f"Correct: {correct_count}/{total}\n"
+        feedback += f"Accuracy: {(correct_count/total*100) if total > 0 else 0:.1f}%\n"
+
+        # Display the feedback text
+        self.pronunciation_feedback_text.setPlainText(feedback)
+        self.pronunciation_feedback_text.show()
+        
+        # Make sure the back card group is visible if we're currently showing the front
+        if self.showing_front:
+            # Store the fact that we have feedback for when the card is flipped
+            self.has_pronunciation_feedback = True
+        else:
+            # We're already on the back card, so make sure it's visible
+            self.pronunciation_feedback_text.show()
 
     def toggle_pronunciation(self, state):
         """Toggle pronunciation visibility"""
