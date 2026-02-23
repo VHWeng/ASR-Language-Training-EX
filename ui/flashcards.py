@@ -15,6 +15,13 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt, pyqtSignal, QTimer
 from PyQt5.QtGui import QFont, QPixmap
 
+# Import TTS engines
+from core.tts_engines import TTSThread
+# Import recording functionality
+from core.recorder import RecordThread
+import sounddevice as sd
+import soundfile as sf
+
 
 class FlashcardSession:
     """Represents a single flashcard learning session"""
@@ -183,6 +190,16 @@ class FlashcardDialog(QDialog):
         self.session = None
         self.current_card = None
         self.showing_front = True  # True = word, False = definition
+        
+        # Initialize TTS engine
+        from core.tts_engines import gTTSEngine, TTSThread
+        self.tts_engine = gTTSEngine()
+        self.tts_thread = None
+        
+        # Initialize recording attributes
+        self.record_thread = None
+        self.recorded_file = None
+        self.audio_file = None
 
         self.setWindowTitle("Flashcard Mode")
         self.setMinimumSize(600, 500)
@@ -528,14 +545,76 @@ class FlashcardDialog(QDialog):
 
     def play_tts(self):
         """Play TTS for the current card"""
-        # TODO: Implement TTS playback
-        # This will integrate with the TTS engines from core.tts_engines
-        pass
+        if not self.current_item:
+            return
+            
+        # Get the text to speak (the reference word/phrase)
+        text = self.current_item.get('reference', '').strip()
+        if not text:
+            return
+            
+        # Get language from config
+        lang_code = self.config['language'].split('-')[0].lower()
+        
+        # Create and start TTS thread
+        self.tts_thread = TTSThread(text, 'gTTS', lang_code)
+        self.tts_thread.start()
 
     def play_slow_tts(self):
         """Play TTS slowly for the current card"""
-        # TODO: Implement slow TTS playback
-        pass
+        if not self.current_item:
+            return
+            
+        # Get the text to speak (the reference word/phrase)
+        text = self.current_item.get('reference', '').strip()
+        if not text:
+            return
+            
+        # Get language from config
+        lang_code = self.config['language'].split('-')[0].lower()
+        
+        # Create and start TTS thread with slow speed
+        self.tts_thread = TTSThread(text, 'gTTS', lang_code, slow=True)
+        self.tts_thread.start()
+
+    def toggle_recording(self):
+        """Toggle recording mode"""
+        if self.record_btn.isChecked():
+            # Start recording
+            self.record_thread = RecordThread(sample_rate=self.config.get('sample_rate', 16000))
+            self.record_thread.finished.connect(self.on_record_finished)
+            self.record_thread.error.connect(self.on_record_error)
+            self.record_thread.start()
+        else:
+            # Stop recording
+            if self.record_thread:
+                self.record_thread.stop_recording()
+
+    def on_record_finished(self, filename):
+        """Handle recording completion"""
+        self.recorded_file = filename
+        self.audio_file = filename
+        # Update UI elements
+        if hasattr(self, 'playback_btn'):
+            self.playback_btn.setEnabled(True)
+
+    def on_record_error(self, error_msg):
+        """Handle recording errors"""
+        print(f"Recording error: {error_msg}")
+
+    def play_user_recording(self):
+        """Play back user recording"""
+        if not self.audio_file:
+            from PyQt5.QtWidgets import QMessageBox
+            QMessageBox.warning(self, "No Audio", "Please record audio first.")
+            return
+
+        try:
+            data, samplerate = sf.read(self.audio_file)
+            sd.play(data, samplerate)
+        except Exception as e:
+            from PyQt5.QtWidgets import QMessageBox
+            QMessageBox.critical(self, "Playback Error", str(e))
 
     def toggle_pronunciation(self, state):
         """Toggle pronunciation visibility"""
@@ -543,16 +622,6 @@ class FlashcardDialog(QDialog):
             self.pronunciation_label.show()
         else:
             self.pronunciation_label.hide()
-
-    def toggle_recording(self):
-        """Toggle recording mode"""
-        # TODO: Implement recording functionality
-        pass
-
-    def play_user_recording(self):
-        """Play back user recording"""
-        # TODO: Implement playback functionality
-        pass
 
     def show_settings(self):
         """Show settings dialog"""
