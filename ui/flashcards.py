@@ -7,6 +7,7 @@ import json
 import os
 import random
 from datetime import datetime, timedelta
+from pathlib import Path
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
     QTextEdit, QProgressBar, QCheckBox, QSpinBox, QGroupBox,
@@ -182,10 +183,11 @@ class FlashcardDialog(QDialog):
     """
     session_completed = pyqtSignal(dict)
 
-    def __init__(self, vocab_data, config, parent=None):
+    def __init__(self, vocab_data, config, parent=None, vocab_file_path=None):
         super().__init__(parent)
         self.vocab_data = vocab_data
         self.config = config
+        self.vocab_file_path = vocab_file_path
         self.progress = FlashcardProgress()
         self.session = None
         self.current_card = None
@@ -236,6 +238,12 @@ class FlashcardDialog(QDialog):
 
         # Top right controls for front card
         front_top_layout = QHBoxLayout()
+        
+        self.enable_image_cb = QCheckBox("Enable Image")
+        self.enable_image_cb.setChecked(True)
+        # self.enable_image_cb.toggled.connect(self.toggle_image_display) # Removed old connection
+        front_top_layout.addWidget(self.enable_image_cb)
+        
         front_top_layout.addStretch()
         self.front_config_btn = QPushButton("⚙️")
         self.front_config_btn.setFixedSize(30, 30)
@@ -294,9 +302,12 @@ class FlashcardDialog(QDialog):
         # Center: Image display
         self.image_label = QLabel()
         self.image_label.setAlignment(Qt.AlignCenter)
-        self.image_label.setScaledContents(True)
+        self.image_label.setScaledContents(False) # Important for manual scaling
         self.image_label.setMinimumSize(200, 200)
+        self.image_label.setText("Image disabled")
+        self.image_label.setStyleSheet("border: 1px solid gray; background-color: #f0f0f0;")
         front_card_layout.addWidget(self.image_label)
+
 
         # Under Image: Recording controls
         record_layout = QHBoxLayout()
@@ -479,13 +490,18 @@ class FlashcardDialog(QDialog):
         self.front_word_label.setText(front)
         self.pronunciation_label.setText(item.get('ipa_pronunciation', ''))
 
-        # Handle image display
-        image_path = item.get('image_filename', '')
-        if image_path and os.path.exists(image_path):
-            pixmap = QPixmap(image_path)
-            self.image_label.setPixmap(pixmap)
-        else:
-            self.image_label.clear()
+        # Disconnect any previous connections to avoid multiple calls
+        try:
+            self.enable_image_cb.toggled.disconnect()
+        except TypeError:
+            pass # No connection to disconnect
+
+        # Connect the checkbox to the image display logic, passing the current item
+        self.enable_image_cb.toggled.connect(
+            lambda state: self.toggle_image_display(state, item)
+        )
+        # Handle image display initially based on checkbox state and current item
+        self.toggle_image_display(self.enable_image_cb.isChecked(), item)
 
         # Reset pronunciation checkbox
         self.show_pronunciation_cb.setChecked(False)
@@ -778,6 +794,55 @@ class FlashcardDialog(QDialog):
             self.pronunciation_label.show()
         else:
             self.pronunciation_label.hide()
+            
+    def toggle_image_display(self, enabled, item=None):
+        if enabled:
+            if item and item.get('image_filename'):
+                self.load_vocabulary_image(item.get('image_filename'))
+            else:
+                self.image_label.setText("No Image")
+                self.image_label.setPixmap(QPixmap()) # Clear pixmap
+        else:
+            self.image_label.setText("Image disabled")
+            self.image_label.setPixmap(QPixmap()) # Clear pixmap
+    
+    def load_vocabulary_image(self, image_filename):
+        """Load and display vocabulary image"""
+        try:
+            # Implementation depends on whether image is in ZIP or filesystem
+            if self.vocab_file_path and self.vocab_file_path.endswith('.zip'):
+                import zipfile
+                with zipfile.ZipFile(self.vocab_file_path, 'r') as zip_file:
+                    # Try to find image
+                    base = Path(image_filename).stem
+                    for name in zip_file.namelist():
+                        if Path(name).stem == base:
+                            image_data = zip_file.read(name)
+                            pixmap = QPixmap()
+                            pixmap.loadFromData(image_data)
+                            if not pixmap.isNull():
+                                self.image_label.setPixmap(pixmap.scaled(
+                                    self.image_label.width() - 2,
+                                    self.image_label.height() - 2,
+                                    Qt.KeepAspectRatio, Qt.SmoothTransformation
+                                ))
+                            return
+            else:
+                # Load from filesystem
+                if self.vocab_file_path:
+                    image_path = Path(self.vocab_file_path).parent / image_filename
+                    if image_path.exists():
+                        pixmap = QPixmap(str(image_path))
+                        if not pixmap.isNull():
+                            self.image_label.setPixmap(pixmap.scaled(
+                                self.image_label.width() -2,
+                                self.image_label.height() - 2,
+                                Qt.KeepAspectRatio, Qt.SmoothTransformation
+                            ))
+
+        except Exception as e:
+            print(f"Image load error: {e}")
+            self.image_label.setText("Image load error")
 
     def show_settings(self):
         """Show settings dialog"""

@@ -759,7 +759,7 @@ class ASRApp(QMainWindow):
             QMessageBox.warning(self, "No Vocabulary", "Please load a vocabulary file first.")
             return
 
-        dialog = FlashcardDialog(self.vocabulary_data, self.config, self)
+        dialog = FlashcardDialog(self.vocabulary_data, self.config, self, vocab_file_path=self.vocab_file_path)
         dialog.session_completed.connect(self.on_flashcard_session_completed)
         dialog.exec_()
 
