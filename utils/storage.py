@@ -334,7 +334,7 @@ class SessionStorage:
     Manages session data storage and retrieval
     """
 
-    def __init__(self, storage_path='session_data.json'):
+    def __init__(self, storage_path='Data/session_data.json'):
         self.storage_path = storage_path
         self.sessions = []
         self.load()

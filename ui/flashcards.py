@@ -68,7 +68,7 @@ class FlashcardProgress:
     Implements spaced repetition algorithm
     """
 
-    def __init__(self, storage_path='flashcard_progress.json'):
+    def __init__(self, storage_path='Data/flashcard_progress.json'):
         self.storage_path = storage_path
         self.items = {}  # {item_id: progress_data}
         self.load()
@@ -188,7 +188,7 @@ class FlashcardDialog(QDialog):
         self.vocab_data = vocab_data
         self.config = config
         self.vocab_file_path = vocab_file_path
-        self.progress = FlashcardProgress()
+        self.progress = FlashcardProgress(storage_path='Data/flashcard_progress.json')
         self.session = None
         self.current_card = None
         self.showing_front = True  # True = word, False = definition
