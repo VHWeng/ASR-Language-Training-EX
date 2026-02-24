@@ -134,6 +134,11 @@ ASR_Language_Training/
 - Session-based learning
 - Persistent progress tracking
 - Statistics visualization
+- **Image Support**: Display contextual images for vocabulary items
+  - Images shown automatically when available in vocabulary files
+  - Supported formats: PNG, JPG, JPEG, GIF
+  - Images displayed on the front of flashcards for visual context
+  - Images loaded from ZIP archives with "images" subdirectory support
 
 #### `components.py`
 - Custom widgets for reuse across UI
@@ -141,6 +146,7 @@ ASR_Language_Training/
 - Image display with scaling
 - Status logging with timestamps
 - Recording button with hold functionality
+- **ImageViewer**: Component for displaying vocabulary images in flashcard mode
 
 ### `utils/` Package
 
@@ -222,7 +228,7 @@ The original `asr_app.py` (single 109KB file) has been refactored into:
 - `utils/storage.py` (persistence)
 
 **Total modular files**: 11 Python modules (vs 1 monolithic file)
-**New features added**: Flashcard mode, progress tracking, extensible engine architecture
+**New features added**: Flashcard mode, progress tracking, extensible engine architecture, image support in flashcards
 
 ## Benefits of Modularization
 

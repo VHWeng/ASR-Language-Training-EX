@@ -152,7 +152,12 @@ world|The earth|wurld|wɜrld|Planet Earth|world.png|Noun, singular
 2. **Flip Card**: Click "Flip" or press Space to reveal the other side
 3. **Listen**: Click 🔊 to hear the pronunciation
 4. **Practice**: Click 🎤 to record your pronunciation
-5. **Rate Difficulty**: After flipping, rate how well you knew the card:
+5. **View Images**: If vocabulary items include images, they will be displayed on the card:
+   - Images are shown on the front of the card when displaying the word
+   - Images appear automatically when available
+   - Supported formats: PNG, JPG, JPEG, GIF
+   - Images are displayed at appropriate size for the card layout
+6. **Rate Difficulty**: After flipping, rate how well you knew the card:
    - **Again**: Didn't know it - will appear again soon
    - **Hard**: Difficult - shortened review interval
    - **Good**: Knew it - normal review interval
@@ -245,11 +250,17 @@ A: Minimum 4GB RAM recommended. Whisper processing benefits from more powerful C
 **Q: Can I create my own vocabulary files?**
 A: Yes! Create CSV files with your desired content following the column structure outlined above.
 
+**Q: Can I add images to my vocabulary?**
+A: Yes! Images can be included in your vocabulary files. For CSV/TXT files, add image filenames in column 6. For ZIP files, place images in an "images/" subdirectory and reference them in column 6.
+
 **Q: What image formats are supported?**
 A: PNG, JPG/JPEG, and GIF formats are supported for vocabulary images.
 
-**Q: How do I organize ZIP files?**
-A: Place your CSV file in the root, and all images in an "images/" subdirectory.
+**Q: Do images appear in flashcard mode?**
+A: Yes, images are automatically displayed on the front of flashcards when available. Images appear when the card shows the word/definition and provide visual context for learning.
+
+**Q: How do I organize images in ZIP files?**
+A: Place your CSV file in the root, and all images in an "images/" subdirectory. The application will automatically detect and display images when showing vocabulary items in flashcard mode.
 
 ### Audio and Pronunciation
 
@@ -275,6 +286,9 @@ A: Cards rated "Easy" appear less frequently, while cards rated "Again" appear s
 
 **Q: Can I export my flashcard data?**
 A: Currently, progress is stored locally. Export functionality is planned for future releases.
+
+**Q: How do I know if a vocabulary item has an image?**
+A: When loading vocabulary, items with images will be indicated in the status area. In flashcard mode, images will automatically appear when the card displays the word or definition.
 
 ## 📞 Support
 

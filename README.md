@@ -31,6 +31,11 @@ An advanced speech recognition application with pronunciation training capabilit
 - Progress tracking and statistics
 - Session-based learning with streak counting
 - Due item review system
+- **Image Support**: Display contextual images for vocabulary items
+  - Images shown automatically when available in vocabulary files
+  - Supported formats: PNG, JPG, JPEG, GIF
+  - Images displayed on the front of flashcards for visual context
+  - Images loaded from ZIP archives with "images" subdirectory support
 
 ### ⚙️ Configuration
 - Customizable column mappings for vocabulary files
@@ -142,11 +147,13 @@ python main.py
 - Choose from multiple delimiter types (comma, pipe, tab, semicolon)
 - Select preferred speech recognition engine and language
 - **Grammar Column**: Specify the column containing grammar information in your vocabulary files.
+- **Image Support**: Include images in vocabulary files for visual learning context
 
 #### Image Integration
 - Display contextual images for vocabulary items
 - Support for common image formats (PNG, JPG, GIF)
 - Automatic loading from ZIP archive structures
+- **Flashcard Image Display**: Images automatically shown on flashcard fronts when available
 
 ## Modular Architecture (Version 3.0)
 
@@ -454,6 +461,7 @@ git status
 - ✅ Confirm supported formats (.png, .jpg, .jpeg, .gif)
 - ✅ Verify column 6 contains correct relative filenames
 - ✅ Check file permissions and path encoding
+- ✅ Ensure images are properly referenced in vocabulary files for flashcard display
 
 **Audio Recording Issues**
 - ✅ Grant microphone permissions to Python/application
