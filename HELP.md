@@ -18,10 +18,10 @@
    ```
 
 2. **First-Time Configuration** (Optional)
-   - Click the gear icon ⚙ to access settings
-   - Configure your preferred speech recognition engine
-   - Set your default language
-   - Configure TTS and other preferences
+    - Click the gear icon ⚙ to access settings
+    - Configure your preferred speech recognition engine
+    - Set your default language
+    - Configure TTS engine and voice selection (gTTS or edge-tts)
 
 3. **Load Your First Vocabulary**
    - Click "📁 Load Vocabulary"
@@ -183,6 +183,51 @@ Click the 📊 (statistics) icon to view:
 - Overall accuracy percentage
 - Cards due for review
 
+## 🔊 Text-to-Speech (TTS) Configuration
+
+The application supports two TTS engines:
+
+- **gTTS (Google Text-to-Speech)**: Default, works out of the box, uses Google's cloud service
+- **Edge TTS (Microsoft Edge)**: Higher quality voices, requires `edge-tts` Python package
+
+### Selecting a TTS Engine
+
+1. Click the gear icon ⚙ to open Configuration
+2. In the "Text-to-Speech (TTS)" section:
+   - Choose your preferred engine from the dropdown: `gTTS` or `edge-tts`
+3. If you select `edge-tts`:
+   - A "Voice" dropdown will appear
+   - Choose from available Microsoft Edge voices (e.g., `en-US-BrianMultilingualNeural`)
+   - The voice list loads automatically when you select edge-tts
+4. Click "OK" to save settings
+
+### Default Settings
+
+- **Default Engine**: gTTS (no additional installation required)
+- **Default Edge TTS Voice**: `en-US-BrianMultilingualNeural` (English, male, multilingual)
+
+### Installation
+
+To use Edge TTS, install the package:
+
+```bash
+pip install edge-tts
+```
+
+The package is included in `requirements.txt`, so it will be installed with:
+
+```bash
+pip install -r requirements.txt
+```
+
+Note: Edge TTS voices are provided by Microsoft and require internet connectivity.
+
+### Using TTS in the Application
+
+- **Normal Speed**: Click `🔊 Play TTS` to hear the reference text at normal speed
+- **Slow Speed**: Click `🐢 Slow TTS` for slower articulation (helpful for learning)
+- **Flashcard Mode**: TTS buttons appear on the back of cards for review after revealing the answer
+
 ## 🔧 Troubleshooting
 
 ### Common Issues
@@ -203,7 +248,10 @@ Click the 📊 (statistics) icon to view:
 **TTS Not Playing**
 - Check system volume
 - Verify internet connection (for gTTS)
+- Ensure `edge-tts` package is installed if using Edge TTS: `pip install edge-tts`
 - Check pygame installation
+- For Edge TTS: ensure you have selected a valid voice in configuration
+- First-time voice loading may take a few seconds (requires internet)
 
 #### File Loading Problems
 **Vocabulary Not Loading**

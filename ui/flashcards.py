@@ -218,10 +218,7 @@ class FlashcardDialog(QDialog):
         # Cache for default logo image
         self.default_logo_pixmap = None
 
-        # Initialize TTS engine
-        from core.tts_engines import gTTSEngine, TTSThread
-
-        self.tts_engine = gTTSEngine()
+        # TTS thread (engine created on demand via TTSThread)
         self.tts_thread = None
 
         # Initialize recording attributes
@@ -656,11 +653,12 @@ class FlashcardDialog(QDialog):
         if not text:
             return
 
-        # Get language from config
+        engine_name = self.config.get("tts_engine", "gTTS")
+        voice = self.config.get("tts_voice") if engine_name == "edge-tts" else None
         lang_code = self.config["language"].split("-")[0].lower()
 
         # Create and start TTS thread
-        self.tts_thread = TTSThread(text, "gTTS", lang_code)
+        self.tts_thread = TTSThread(text, engine_name, lang_code, voice=voice)
         self.tts_thread.start()
 
     def play_slow_tts(self):
@@ -673,11 +671,14 @@ class FlashcardDialog(QDialog):
         if not text:
             return
 
-        # Get language from config
+        engine_name = self.config.get("tts_engine", "gTTS")
+        voice = self.config.get("tts_voice") if engine_name == "edge-tts" else None
         lang_code = self.config["language"].split("-")[0].lower()
 
         # Create and start TTS thread with slow speed
-        self.tts_thread = TTSThread(text, "gTTS", lang_code, slow=True)
+        self.tts_thread = TTSThread(
+            text, engine_name, lang_code, slow=True, voice=voice
+        )
         self.tts_thread.start()
 
     def toggle_recording(self):

@@ -14,11 +14,11 @@ from PyQt5.QtCore import QThread, pyqtSignal
 class TTSBase:
     """Base class for TTS engines"""
 
-    def speak(self, text, language, slow=False):
+    def speak(self, text, language, slow=False, voice=None):
         """Speak the given text"""
         raise NotImplementedError
 
-    def speak_words_sequentially(self, words, language, pause_between=0.5):
+    def speak_words_sequentially(self, words, language, pause_between=0.5, voice=None):
         """Speak words one at a time with pauses"""
         raise NotImplementedError
 
@@ -29,8 +29,8 @@ class gTTSEngine(TTSBase):
     def __init__(self):
         pygame.mixer.init()
 
-    def speak(self, text, language, slow=False):
-        """Speak text using gTTS"""
+    def speak(self, text, language, slow=False, voice=None):
+        """Speak text using gTTS (voice parameter ignored)"""
         try:
             tts = gTTS(text=text, lang=language, slow=slow)
             mp3_fp = io.BytesIO()
@@ -49,8 +49,8 @@ class gTTSEngine(TTSBase):
             print(f"gTTS Error: {e}")
             return False
 
-    def speak_words_sequentially(self, words, language, pause_between=0.5):
-        """Speak words one at a time with pauses"""
+    def speak_words_sequentially(self, words, language, pause_between=0.5, voice=None):
+        """Speak words one at a time with pauses (voice parameter ignored)"""
         try:
             for i, word in enumerate(words):
                 if not word.strip():
@@ -78,6 +78,73 @@ class gTTSEngine(TTSBase):
             return False
 
 
+class EdgeTTSEngine(TTSBase):
+    """Microsoft Edge TTS engine implementation using edge-tts library"""
+
+    def __init__(self, voice=None):
+        try:
+            import edge_tts
+
+            self.edge_tts = edge_tts
+        except ImportError:
+            raise ImportError(
+                "edge-tts package required. Install: pip install edge-tts"
+            )
+        self.voice = voice or "en-US-BrianMultilingualNeural"
+
+    def speak(self, text, language=None, slow=False, voice=None):
+        """Speak text using Edge TTS (sync wrapper)"""
+        try:
+            import asyncio, io, time
+
+            voice_to_use = voice or self.voice
+
+            # Async audio generation
+            async def generate_audio():
+                communicate = self.edge_tts.Communicate(
+                    text, voice_to_use, rate="-50%" if slow else "+0%"
+                )
+                audio_data = bytes()
+                async for chunk in communicate.stream():
+                    if "data" in chunk:
+                        audio_data += chunk["data"]
+                return audio_data
+
+            audio_data = asyncio.run(generate_audio())
+
+            # Play via pygame
+            import pygame
+
+            pygame.mixer.init()
+            mp3_fp = io.BytesIO(audio_data)
+            pygame.mixer.music.load(mp3_fp)
+            pygame.mixer.music.play()
+
+            while pygame.mixer.music.get_busy():
+                time.sleep(0.1)
+            return True
+        except Exception as e:
+            print(f"Edge TTS Error: {e}")
+            return False
+
+    def speak_words_sequentially(
+        self, words, language=None, pause_between=0.5, voice=None
+    ):
+        """Speak words one at a time"""
+        try:
+            voice_to_use = voice or self.voice
+            for word in words:
+                if not word.strip():
+                    continue
+                if not self.speak(word, language, slow=True, voice=voice_to_use):
+                    return False
+                time.sleep(pause_between)
+            return True
+        except Exception as e:
+            print(f"Edge TTS Sequential Error: {e}")
+            return False
+
+
 class Pyttsx3Engine(TTSBase):
     """
     pyttsx3 TTS engine (Offline)
@@ -90,16 +157,12 @@ class Pyttsx3Engine(TTSBase):
         # self.engine = pyttsx3.init()
         pass
 
-    def speak(self, text, language, slow=False):
-        """Speak text using pyttsx3"""
-        # TODO: Implement pyttsx3 TTS
-        # self.engine.say(text)
-        # self.engine.runAndWait()
+    def speak(self, text, language, slow=False, voice=None):
+        """Speak text using pyttsx3 (NotImplemented)"""
         raise NotImplementedError("pyttsx3 engine not yet implemented")
 
-    def speak_words_sequentially(self, words, language, pause_between=0.5):
-        """Speak words one at a time"""
-        # TODO: Implement sequential word playback
+    def speak_words_sequentially(self, words, language, pause_between=0.5, voice=None):
+        """Speak words one at a time (NotImplemented)"""
         raise NotImplementedError("pyttsx3 sequential playback not yet implemented")
 
 
@@ -113,49 +176,61 @@ class EspeakEngine(TTSBase):
         # TODO: Initialize espeak integration
         pass
 
-    def speak(self, text, language, slow=False):
-        """Speak text using espeak"""
-        # TODO: Implement espeak TTS using subprocess or wrapper
+    def speak(self, text, language, slow=False, voice=None):
+        """Speak text using espeak (NotImplemented)"""
         raise NotImplementedError("eSpeak engine not yet implemented")
 
-    def speak_words_sequentially(self, words, language, pause_between=0.5):
-        """Speak words one at a time"""
+    def speak_words_sequentially(self, words, language, pause_between=0.5, voice=None):
+        """Speak words one at a time (NotImplemented)"""
         raise NotImplementedError("eSpeak sequential playback not yet implemented")
 
 
 class TTSThread(QThread):
     """Thread for TTS playback"""
+
     finished = pyqtSignal()
     error = pyqtSignal(str)
     word_started = pyqtSignal(int, str)  # Emits word index and word
     word_finished = pyqtSignal(int)
 
-    def __init__(self, text, engine_name='gTTS', language='en', slow=False, word_by_word=False):
+    def __init__(
+        self,
+        text,
+        engine_name="gTTS",
+        language="en",
+        slow=False,
+        word_by_word=False,
+        voice=None,
+    ):
         super().__init__()
         self.text = text
         self.engine_name = engine_name
         self.language = language
         self.slow = slow
         self.word_by_word = word_by_word
+        self.voice = voice
         self._is_running = True
 
     def run(self):
         try:
-            if self.engine_name == 'gTTS':
+            if self.engine_name == "gTTS":
                 engine = gTTSEngine()
-            elif self.engine_name == 'pyttsx3':
+            elif self.engine_name == "edge-tts":
+                engine = EdgeTTSEngine(voice=self.voice)
+            elif self.engine_name == "pyttsx3":
                 engine = Pyttsx3Engine()
-            elif self.engine_name == 'espeak':
+            elif self.engine_name == "espeak":
                 engine = EspeakEngine()
             else:
                 raise ValueError(f"Unknown TTS engine: {self.engine_name}")
 
             if self.word_by_word:
                 import re
-                words = re.findall(r'\S+', self.text)
-                engine.speak_words_sequentially(words, self.language)
+
+                words = re.findall(r"\S+", self.text)
+                engine.speak_words_sequentially(words, self.language, voice=self.voice)
             else:
-                engine.speak(self.text, self.language, self.slow)
+                engine.speak(self.text, self.language, self.slow, voice=self.voice)
 
             if self._is_running:
                 self.finished.emit()
@@ -173,13 +248,24 @@ class TTSEngineManager:
     """Manager for TTS engines"""
 
     def __init__(self):
-        self.engines = {
-            'gTTS': gTTSEngine(),
-            # 'pyttsx3': Pyttsx3Engine(),  # Uncomment when implemented
-            # 'espeak': EspeakEngine(),    # Uncomment when implemented
-        }
-        self.available_engines = ['gTTS']
-        self.planned_engines = ['pyttsx3', 'espeak', 'Azure TTS', 'AWS Polly', 'IBM Watson TTS']
+        self.engines = {}
+        self.engines["gTTS"] = gTTSEngine()
+        # Try to add edge-tts if available
+        try:
+            import edge_tts
+
+            self.engines["edge-tts"] = EdgeTTSEngine()
+            self.available_engines = ["gTTS", "edge-tts"]
+        except ImportError:
+            self.available_engines = ["gTTS"]
+
+        self.planned_engines = [
+            "pyttsx3",
+            "espeak",
+            "Azure TTS",
+            "AWS Polly",
+            "IBM Watson TTS",
+        ]
 
     def get_available_engines(self):
         """Get list of available TTS engines"""

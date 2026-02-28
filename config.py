@@ -4,77 +4,77 @@ Contains ConfigDialog class and default settings
 """
 
 from PyQt5.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout, QLabel, QComboBox,
-    QLineEdit, QPushButton, QGroupBox, QSpinBox, QGridLayout, QTextEdit
+    QDialog,
+    QVBoxLayout,
+    QHBoxLayout,
+    QLabel,
+    QComboBox,
+    QLineEdit,
+    QPushButton,
+    QGroupBox,
+    QSpinBox,
+    QGridLayout,
+    QTextEdit,
 )
 
 
 # Default application settings
 DEFAULT_CONFIG = {
-    'engine': 'Google Speech Recognition',
-    'language': 'el-GR',
-    'language_name': 'Greek',
-    'model': 'latest_short',
-    'sample_rate': 16000,
-    'energy_threshold': 300,
-    'pronunciation_threshold': 80,
-    'vocab_delimiter': '|',
-    'vocab_columns': {
-        'reference': 1,
-        'definition': 2,
-        'english_pronunciation': 3,
-        'ipa_pronunciation': 4,
-        'image_description': 5,
-        'image_filename': 6,
-        'grammar': 7
+    "engine": "Google Speech Recognition",
+    "language": "el-GR",
+    "language_name": "Greek",
+    "model": "latest_short",
+    "sample_rate": 16000,
+    "energy_threshold": 300,
+    "pronunciation_threshold": 80,
+    "vocab_delimiter": "|",
+    "vocab_columns": {
+        "reference": 1,
+        "definition": 2,
+        "english_pronunciation": 3,
+        "ipa_pronunciation": 4,
+        "image_description": 5,
+        "image_filename": 6,
+        "grammar": 7,
     },
     # TTS settings
-    'tts_engine': 'gTTS',
-    'tts_speed': 'normal',
-    'tts_voice': 'default',
+    "tts_engine": "gTTS",
+    "tts_speed": "normal",
+    "tts_voice": "en-US-BrianMultilingualNeural",
     # ASR engine settings
-    'asr_engines': ['Google Speech Recognition', 'Whisper', 'Qwen3-ASR'],
-    'asr_engine_settings': {
-        'Google Speech Recognition': {
-            'timeout': 10,
-            'phrase_threshold': 0.3,
-            'pause_threshold': 0.8
+    "asr_engines": ["Google Speech Recognition", "Whisper", "Qwen3-ASR"],
+    "asr_engine_settings": {
+        "Google Speech Recognition": {
+            "timeout": 10,
+            "phrase_threshold": 0.3,
+            "pause_threshold": 0.8,
         },
-        'Whisper': {
-            'device': 'auto',  # 'cpu', 'cuda', 'auto'
-            'fp16': False,
-            'verbose': False
+        "Whisper": {
+            "device": "auto",  # 'cpu', 'cuda', 'auto'
+            "fp16": False,
+            "verbose": False,
         },
-        'Qwen3-ASR': {
-            'device': 'auto',  # Auto-detect GPU/CPU, 'cpu', 'cuda'
-            'sample_rate': 16000,
-            'model': 'Qwen3-ASR-1.7B'  # Default model
-        }
+        "Qwen3-ASR": {
+            "device": "auto",  # Auto-detect GPU/CPU, 'cpu', 'cuda'
+            "sample_rate": 16000,
+            "model": "Qwen3-ASR-1.7B",  # Default model
+        },
     },
     # TTS engine settings
-    'tts_engines': ['gTTS', 'pyttsx3', 'espeak'],
-    'tts_engine_settings': {
-        'gTTS': {
-            'slow': False,
-            'lang_check': True
-        },
-        'pyttsx3': {
-            'rate': 150,
-            'volume': 1.0
-        },
-        'espeak': {
-            'speed': 150,
-            'pitch': 50
-        }
+    "tts_engines": ["gTTS", "edge-tts"],
+    "tts_engine_settings": {
+        "gTTS": {"slow": False, "lang_check": True},
+        "pyttsx3": {"rate": 150, "volume": 1.0},
+        "espeak": {"speed": 150, "pitch": 50},
     },
     # Flashcard settings
-    'flashcard': {
-        'auto_advance': False,
-        'auto_advance_delay': 3.0,
-        'show_first': 'word',  # 'word', 'definition'
-        'shuffle_cards': False,
-        'repeat_incorrect': True
-    }
+    "flashcard": {
+        "auto_advance": False,
+        "auto_advance_delay": 3.0,
+        "show_first": "word",  # 'word', 'definition'
+        "shuffle_cards": False,
+        "repeat_incorrect": True,
+    },
 }
 
 
@@ -98,7 +98,7 @@ class ConfigDialog(QDialog):
 
         self.engine_label = QLabel("Select Engine:")
         self.engine_combo = QComboBox()
-        self.engine_combo.addItems(DEFAULT_CONFIG['asr_engines'])
+        self.engine_combo.addItems(DEFAULT_CONFIG["asr_engines"])
         self.engine_combo.currentIndexChanged.connect(self.on_engine_changed)
 
         engine_layout.addWidget(self.engine_label)
@@ -125,7 +125,7 @@ class ConfigDialog(QDialog):
             "Chinese": "zh-CN",
             "Japanese": "ja-JP",
             "Korean": "ko-KR",
-            "Arabic": "ar-SA"
+            "Arabic": "ar-SA",
         }
         self.lang_combo.addItems(self.languages.keys())
         self.lang_combo.setCurrentText("Greek")
@@ -198,8 +198,10 @@ class ConfigDialog(QDialog):
         # New: Status text box for detailed info
         self.status_log = QTextEdit()
         self.status_log.setReadOnly(True)
-        self.status_log.setFixedHeight(100) # Give it a fixed height
-        self.status_log.setPlaceholderText("Connection test status and model info will appear here...")
+        self.status_log.setFixedHeight(100)  # Give it a fixed height
+        self.status_log.setPlaceholderText(
+            "Connection test status and model info will appear here..."
+        )
         settings_layout.addWidget(self.status_log)
 
         # Pronunciation threshold
@@ -216,17 +218,43 @@ class ConfigDialog(QDialog):
         layout.addWidget(settings_group)
 
         # TTS Engine selection
-        tts_group = QGroupBox("TTS Engine (Planned Feature)")
+        tts_group = QGroupBox("Text-to-Speech (TTS)")
         tts_layout = QVBoxLayout()
 
         self.tts_engine_label = QLabel("Select TTS Engine:")
         self.tts_engine_combo = QComboBox()
-        self.tts_engine_combo.addItems(DEFAULT_CONFIG['tts_engines'])
-        self.tts_engine_combo.setEnabled(False)  # Placeholder for future implementation
-        self.tts_engine_combo.setToolTip("TTS engine selection - coming in a future update")
+        self.tts_engine_combo.addItems(DEFAULT_CONFIG["tts_engines"])
+        self.tts_engine_combo.currentIndexChanged.connect(self.on_tts_engine_changed)
+        self.tts_engine_combo.setToolTip("Select TTS engine for pronunciation playback")
+        # Initialize to the configured engine
+        current_engine = self.current_config.get(
+            "tts_engine", DEFAULT_CONFIG.get("tts_engine", "gTTS")
+        )
+        index = self.tts_engine_combo.findText(current_engine)
+        if index >= 0:
+            self.tts_engine_combo.setCurrentIndex(index)
 
         tts_layout.addWidget(self.tts_engine_label)
         tts_layout.addWidget(self.tts_engine_combo)
+
+        # Voice selection (for edge-tts)
+        self.voice_label = QLabel("Voice (edge-tts only):")
+        self.voice_combo = QComboBox()
+        self.voice_combo.setEnabled(False)
+        self.voice_combo.setToolTip(
+            "Select voice for edge-tts (only applicable when edge-tts engine is selected)"
+        )
+
+        tts_layout.addWidget(self.voice_label)
+        tts_layout.addWidget(self.voice_combo)
+
+        # Info label about voice selection
+        self.tts_info_label = QLabel(
+            "Note: gTTS uses language setting only. edge-tts offers specific voices."
+        )
+        self.tts_info_label.setStyleSheet("color: gray; font-size: 10px;")
+        tts_layout.addWidget(self.tts_info_label)
+
         tts_group.setLayout(tts_layout)
         layout.addWidget(tts_group)
 
@@ -312,6 +340,7 @@ class ConfigDialog(QDialog):
         layout.addLayout(btn_layout)
 
         self.setLayout(layout)
+        self.on_tts_engine_changed()
 
     def on_engine_changed(self):
         self.update_model_options()
@@ -330,41 +359,199 @@ class ConfigDialog(QDialog):
 
     def update_model_options(self):
         self.model_combo.clear()
-        if self.engine_combo.currentText() == "Google Speech Recognition":
-            # Note: Free Google Speech API doesn't support model selection
-            # These options are for reference only - the API uses its default model
-            self.model_combo.addItems([
-                "Default",
-            ])
-        elif self.engine_combo.currentText() == "Whisper":
-            self.model_combo.addItems([
-                'tiny.en', 'tiny', 'base.en', 'base', 'small.en',
-                'small', 'medium.en', 'medium', 'large-v1',
-                'large-v2', 'large-v3', 'large'
-            ])
-            self.model_combo.setCurrentText("base")
-
-    def update_model_options(self):
-        self.model_combo.clear()
         engine = self.engine_combo.currentText()
         if engine == "Google Speech Recognition":
             # Note: Free Google Speech API doesn't support model selection
             # These options are for reference only - the API uses its default model
-            self.model_combo.addItems([
-                "Default",
-            ])
+            self.model_combo.addItems(
+                [
+                    "Default",
+                ]
+            )
         elif engine == "Whisper":
-            self.model_combo.addItems([
-                'tiny.en', 'tiny', 'base.en', 'base', 'small.en',
-                'small', 'medium.en', 'medium', 'large-v1',
-                'large-v2', 'large-v3', 'large'
-            ])
+            self.model_combo.addItems(
+                [
+                    "tiny.en",
+                    "tiny",
+                    "base.en",
+                    "base",
+                    "small.en",
+                    "small",
+                    "medium.en",
+                    "medium",
+                    "large-v1",
+                    "large-v2",
+                    "large-v3",
+                    "large",
+                ]
+            )
         elif engine == "Qwen3-ASR":
-            self.model_combo.addItems([
-                'Qwen3-ASR-1.7B',
-                'Qwen3-ASR-0.6B'
-            ])
+            self.model_combo.addItems(["Qwen3-ASR-1.7B", "Qwen3-ASR-0.6B"])
             self.model_combo.setCurrentText("Qwen3-ASR-1.7B")
+
+    def on_tts_engine_changed(self):
+        """Handle TTS engine selection change"""
+        engine = self.tts_engine_combo.currentText()
+        print(
+            f"[DEBUG] on_tts_engine_changed: engine={engine}, voice_combo.count={self.voice_combo.count()}"
+        )
+        if engine == "edge-tts":
+            self.voice_label.show()
+            self.voice_combo.show()
+            self.voice_combo.setEnabled(True)
+            if self.voice_combo.count() == 0:
+                print("[DEBUG] Calling load_edge_tts_voices")
+                self.load_edge_tts_voices()
+            else:
+                print("[DEBUG] Voice combo already has items, skipping load")
+        else:
+            self.voice_label.hide()
+            self.voice_combo.hide()
+            self.voice_combo.setEnabled(False)
+
+    def load_edge_tts_voices(self):
+        """Load available edge-tts voices in background thread"""
+        import threading
+        import asyncio
+
+        # Show loading state immediately (called from main thread — safe)
+        self.voice_combo.clear()
+        self.voice_combo.addItem("Loading voices...", None)
+        self.voice_combo.setEnabled(False)
+        print("[DEBUG] load_edge_tts_voices: starting background fetch thread")
+
+        def fetch_voices():
+            print("[DEBUG] fetch_voices thread started")
+            voices_data = []
+            try:
+                import edge_tts
+
+                print("[DEBUG] edge_tts imported successfully")
+                # asyncio.run() creates a brand-new event loop — safe in a plain thread
+                voices = asyncio.run(edge_tts.list_voices())
+                print(f"[DEBUG] asyncio.run(list_voices()) returned {len(voices)} voices")
+
+                if not voices:
+                    print("[DEBUG] WARNING: voice list is empty!")
+
+                # Sort and format
+                voices.sort(key=lambda v: (v.get("Locale", ""), v.get("ShortName", "")))
+                for voice in voices:
+                    display = (
+                        f"{voice.get('ShortName', 'Unknown')} "
+                        f"({voice.get('Locale', 'Unknown')}) - "
+                        f"{voice.get('Gender', 'Unknown')}"
+                    )
+                    voices_data.append((display, voice.get("ShortName")))
+
+                print(f"[DEBUG] Prepared {len(voices_data)} voice entries for UI")
+
+            except ImportError as e:
+                print(f"[DEBUG] ImportError — edge_tts not installed? {e}")
+                voices_data = [(f"edge-tts not installed: {e}", None)]
+            except Exception as e:
+                print(f"[DEBUG] Exception fetching voices: {type(e).__name__}: {e}")
+                import traceback
+                traceback.print_exc()
+                voices_data = [(f"Error loading voices: {e}", None)]
+
+            # ---------------------------------------------------------------
+            # CRITICAL FIX: QTimer.singleShot must be called from the main
+            # (GUI) thread.  Calling it from a worker thread means the timer
+            # is owned by that thread and fires there — but Qt widgets can
+            # only be touched from the main thread, so the callback is either
+            # silently dropped or causes a crash/hang.
+            #
+            # Fix: use a custom Qt signal emitted from the worker thread so
+            # Qt's cross-thread queued connection delivers the call safely on
+            # the main thread.  If signals aren't available we fall back to
+            # QMetaObject.invokeMethod with a Qt.QueuedConnection.
+            # ---------------------------------------------------------------
+            def update_ui():
+                print("[DEBUG] update_ui running on main thread — updating voice_combo")
+                self.voice_combo.clear()
+                for display, data in voices_data:
+                    self.voice_combo.addItem(display, data)
+                print(f"[DEBUG] voice_combo now has {self.voice_combo.count()} items")
+
+                # Set default voice
+                default_voice = self.current_config.get(
+                    "tts_voice", DEFAULT_CONFIG["tts_voice"]
+                )
+                print(f"[DEBUG] Looking for default voice: '{default_voice}'")
+                idx = self.voice_combo.findData(default_voice)
+                if idx >= 0:
+                    self.voice_combo.setCurrentIndex(idx)
+                    print(f"[DEBUG] Default voice set at index {idx}")
+                else:
+                    print(
+                        f"[DEBUG] Default voice '{default_voice}' not found — "
+                        "selecting index 0"
+                    )
+                    if self.voice_combo.count() > 0:
+                        self.voice_combo.setCurrentIndex(0)
+
+                # Enable the combo only when we have real entries
+                has_valid = len(voices_data) > 0 and voices_data[0][1] is not None
+                self.voice_combo.setEnabled(has_valid)
+                print(f"[DEBUG] voice_combo enabled={has_valid}")
+
+            # Use QMetaObject.invokeMethod to guarantee execution on the
+            # main/GUI thread via a queued connection — this is safe to call
+            # from any thread.
+            from PyQt5.QtCore import QMetaObject, Qt
+            import PyQt5.QtCore as QtCore
+
+            # Wrap update_ui in a zero-argument slot via a lambda stored on a
+            # temporary QObject so invokeMethod can dispatch it.
+            # Simplest cross-thread approach: use a thread-safe signal bridge.
+            print("[DEBUG] Dispatching update_ui to main thread via _VoiceBridge")
+            self._voice_bridge.voices_ready.emit(voices_data)
+
+        # Create a lightweight signal bridge so the worker thread can safely
+        # post the result back to the main thread.
+        from PyQt5.QtCore import QObject, pyqtSignal
+
+        class _VoiceBridge(QObject):
+            # Signal carries the list of (display, shortname) tuples
+            voices_ready = pyqtSignal(list)
+
+        bridge = _VoiceBridge(self)  # parent=self keeps it alive
+
+        def _on_voices_ready(voices_data):
+            print("[DEBUG] _on_voices_ready signal received on main thread")
+            self.voice_combo.clear()
+            for display, data in voices_data:
+                self.voice_combo.addItem(display, data)
+            print(f"[DEBUG] voice_combo now has {self.voice_combo.count()} items")
+
+            default_voice = self.current_config.get(
+                "tts_voice", DEFAULT_CONFIG["tts_voice"]
+            )
+            print(f"[DEBUG] Looking for default voice: '{default_voice}'")
+            idx = self.voice_combo.findData(default_voice)
+            if idx >= 0:
+                self.voice_combo.setCurrentIndex(idx)
+                print(f"[DEBUG] Default voice set at index {idx}")
+            else:
+                print(
+                    f"[DEBUG] Default voice '{default_voice}' not found — selecting index 0"
+                )
+                if self.voice_combo.count() > 0:
+                    self.voice_combo.setCurrentIndex(0)
+
+            has_valid = len(voices_data) > 0 and voices_data[0][1] is not None
+            self.voice_combo.setEnabled(has_valid)
+            print(f"[DEBUG] voice_combo enabled={has_valid}")
+
+        # Qt automatically makes this a QueuedConnection because the signal
+        # is emitted from a different thread — so _on_voices_ready always
+        # runs on the main thread. No manual thread-safety needed.
+        bridge.voices_ready.connect(_on_voices_ready)
+        self._voice_bridge = bridge  # keep reference alive
+
+        threading.Thread(target=fetch_voices, daemon=True).start()
+        print("[DEBUG] Background thread started, returning control to event loop")
 
     def test_asr_connection(self):
         """Test ASR engine connection and display feedback"""
@@ -372,15 +559,15 @@ class ConfigDialog(QDialog):
         import tempfile
         import numpy as np
         import soundfile as sf
-        import os # Import os for file cleanup
+        import os  # Import os for file cleanup
 
         engine = self.engine_combo.currentText()
         device = self.device_combo.currentText()
-        model = self.model_combo.currentText() # Get selected model
+        model = self.model_combo.currentText()  # Get selected model
 
         self.test_btn.setEnabled(False)
         self.test_status.setText("⏳ Testing...")
-        self.status_log.clear() # Clear previous logs
+        self.status_log.clear()  # Clear previous logs
         self.status_log.append(f"Attempting to test ASR engine: {engine}")
         self.status_log.append(f"Selected model: {model}")
         if engine == "Qwen3-ASR":
@@ -390,7 +577,7 @@ class ConfigDialog(QDialog):
         try:
             self.status_log.append("Generating a temporary audio file for testing...")
             # Create temporary audio file for testing
-            with tempfile.NamedTemporaryFile(suffix='.wav', delete=False) as temp_file:
+            with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
                 temp_audio_file = temp_file.name
                 # Generate 1 second of 1000 Hz tone for testing
                 sample_rate = 16000
@@ -405,12 +592,12 @@ class ConfigDialog(QDialog):
 
             # Create test config
             test_config = {
-                'engine': engine,
-                'device': device,
-                'sample_rate': 16000,
-                'model': model, # Use the selected model
-                'language': self.languages[self.lang_combo.currentText()],
-                'energy_threshold': 300
+                "engine": engine,
+                "device": device,
+                "sample_rate": 16000,
+                "model": model,  # Use the selected model
+                "language": self.languages[self.lang_combo.currentText()],
+                "energy_threshold": 300,
             }
             self.status_log.append(f"Test configuration: {test_config}")
 
@@ -420,11 +607,11 @@ class ConfigDialog(QDialog):
                 temp_audio_file,
                 test_config,
                 show_punctuation=False,
-                show_word_time=False
+                show_word_time=False,
             )
 
             asr_thread.start()
-            asr_thread.wait() # Wait for the thread to finish
+            asr_thread.wait()  # Wait for the thread to finish
 
             if asr_thread.error_occurred:
                 raise Exception(asr_thread.error_message)
@@ -446,32 +633,37 @@ class ConfigDialog(QDialog):
             # Clean up the temporary audio file
             if temp_audio_file and os.path.exists(temp_audio_file):
                 os.remove(temp_audio_file)
-                self.status_log.append(f"Cleaned up temporary audio file: {temp_audio_file}")
+                self.status_log.append(
+                    f"Cleaned up temporary audio file: {temp_audio_file}"
+                )
 
     def get_config(self):
         """Get the current configuration as a dictionary"""
         config = {
-            'engine': self.engine_combo.currentText(),
-            'language': self.languages[self.lang_combo.currentText()],
-            'language_name': self.lang_combo.currentText(),
-            'model': self.model_combo.currentText(),
-            'sample_rate': int(self.rate_entry.text()),
-            'energy_threshold': int(self.energy_entry.text()),
-            'pronunciation_threshold': self.pron_spin.value(),
-            'vocab_delimiter': self.delim_combo.currentText(),
-            'vocab_columns': {
-                'reference': self.ref_col_spin.value(),
-                'definition': self.def_col_spin.value(),
-                'english_pronunciation': self.eng_pron_col_spin.value(),
-                'ipa_pronunciation': self.ipa_col_spin.value(),
-                'image_description': self.img_desc_col_spin.value(),
-                'image_filename': self.img_file_col_spin.value(),
-                'grammar': self.grammar_col_spin.value()
+            "engine": self.engine_combo.currentText(),
+            "language": self.languages[self.lang_combo.currentText()],
+            "language_name": self.lang_combo.currentText(),
+            "model": self.model_combo.currentText(),
+            "sample_rate": int(self.rate_entry.text()),
+            "energy_threshold": int(self.energy_entry.text()),
+            "pronunciation_threshold": self.pron_spin.value(),
+            "vocab_delimiter": self.delim_combo.currentText(),
+            "vocab_columns": {
+                "reference": self.ref_col_spin.value(),
+                "definition": self.def_col_spin.value(),
+                "english_pronunciation": self.eng_pron_col_spin.value(),
+                "ipa_pronunciation": self.ipa_col_spin.value(),
+                "image_description": self.img_desc_col_spin.value(),
+                "image_filename": self.img_file_col_spin.value(),
+                "grammar": self.grammar_col_spin.value(),
             },
-            'tts_engine': self.tts_engine_combo.currentText(),
+            "tts_engine": self.tts_engine_combo.currentText(),
+            "tts_voice": self.voice_combo.currentData()
+            if self.voice_combo.currentData()
+            else DEFAULT_CONFIG["tts_voice"],
             # Include default settings for new features
-            'asr_engines': DEFAULT_CONFIG['asr_engines'],
-            'tts_engines': DEFAULT_CONFIG['tts_engines'],
-            'flashcard': DEFAULT_CONFIG['flashcard']
+            "asr_engines": DEFAULT_CONFIG["asr_engines"],
+            "tts_engines": DEFAULT_CONFIG["tts_engines"],
+            "flashcard": DEFAULT_CONFIG["flashcard"],
         }
         return config

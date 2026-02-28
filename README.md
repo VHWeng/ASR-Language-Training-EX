@@ -23,7 +23,7 @@ An advanced speech recognition application with pronunciation training capabilit
 - Text-to-Speech (TTS) with normal and slow modes
 - ASR conversion with accuracy scoring
 - Pronunciation feedback and assessment
-- **Planned**: Multiple TTS engine support (pyttsx3, espeak, cloud services)
+- **Multiple TTS Engines**: Support for gTTS (Google) and Microsoft Edge TTS (edge-tts) with configurable voice selection
 
 ### 🎴 Flashcard Mode
 - Interactive flashcard learning with spaced repetition
@@ -46,7 +46,7 @@ An advanced speech recognition application with pronunciation training capabilit
 - Customizable column mappings for vocabulary files
 - Multiple delimiter support (comma, pipe, tab, semicolon)
 - Language selection for speech recognition
-- **Planned**: ASR and TTS engine selection
+- **TTS Engine Selection**: Choose between gTTS and Edge TTS, with voice selection for Edge TTS
 - Intuitive user interface with clear status feedback
 
 ## Installation
@@ -192,7 +192,8 @@ ASR_Language_Training/
 │   │
 │   └── tts_engines.py              # TTS engine implementations
 │                                     - TTSBase: Abstract base class
-│                                     - gTTSEngine: Google TTS (current)
+│                                     - gTTSEngine: Google TTS
+│                                     - EdgeTTSEngine: Microsoft Edge TTS (needs edge-tts package)
 │                                     - Pyttsx3Engine: Offline TTS (planned)
 │                                     - EspeakEngine: Open source (planned)
 │                                     - TTSThread: Async TTS playback

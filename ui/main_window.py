@@ -15,10 +15,24 @@ import pygame
 import sounddevice as sd
 import soundfile as sf
 from PyQt5.QtWidgets import (
-    QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-    QPushButton, QTextEdit, QLabel, QFileDialog, QMessageBox,
-    QToolButton, QGroupBox, QProgressBar, QTabWidget, QLineEdit,
-    QCheckBox, QSpinBox, QGridLayout
+    QApplication,
+    QMainWindow,
+    QWidget,
+    QVBoxLayout,
+    QHBoxLayout,
+    QPushButton,
+    QTextEdit,
+    QLabel,
+    QFileDialog,
+    QMessageBox,
+    QToolButton,
+    QGroupBox,
+    QProgressBar,
+    QTabWidget,
+    QLineEdit,
+    QCheckBox,
+    QSpinBox,
+    QGridLayout,
 )
 from PyQt5.QtCore import Qt, pyqtSignal, QTimer
 from PyQt5.QtGui import QIcon, QFont, QPixmap
@@ -27,13 +41,26 @@ from PyQt5.QtGui import QIcon, QFont, QPixmap
 from config import ConfigDialog, DEFAULT_CONFIG
 from core.recorder import RecordThread
 from core.asr_engines import ASRThread
-from core.tts_engines import gTTSEngine, TTSThread
-from utils.text_processing import normalize_text, clean_ai_response, clean_display_text, text_to_ipa_modern
-from utils.storage import save_text_to_file, generate_pronunciation_report, SessionStorage
+from core.tts_engines import TTSThread
+from utils.text_processing import (
+    normalize_text,
+    clean_ai_response,
+    clean_display_text,
+    text_to_ipa_modern,
+)
+from utils.storage import (
+    save_text_to_file,
+    generate_pronunciation_report,
+    SessionStorage,
+)
 from ui.flashcards import FlashcardDialog, FlashcardProgress
 from ui.components import (
-    PronunciationFeedbackWidget, AudioLevelIndicator, ImageViewer,
-    StatusLog, RecordingButton, VocabularyNavigator
+    PronunciationFeedbackWidget,
+    AudioLevelIndicator,
+    ImageViewer,
+    StatusLog,
+    RecordingButton,
+    VocabularyNavigator,
 )
 
 
@@ -54,7 +81,7 @@ class ASRApp(QMainWindow):
         self.image_directory = None
 
         # TTS engine
-        self.tts_engine = gTTSEngine()
+
         self.tts_thread = None
 
         # Session storage
@@ -189,11 +216,15 @@ class ASRApp(QMainWindow):
         # Font size controls for reference text
         self.ref_font_minus_btn = QPushButton("-")
         self.ref_font_minus_btn.setFixedWidth(25)
-        self.ref_font_minus_btn.clicked.connect(lambda: self.change_font_size(self.reference_text, -1))
+        self.ref_font_minus_btn.clicked.connect(
+            lambda: self.change_font_size(self.reference_text, -1)
+        )
 
         self.ref_font_plus_btn = QPushButton("+")
         self.ref_font_plus_btn.setFixedWidth(25)
-        self.ref_font_plus_btn.clicked.connect(lambda: self.change_font_size(self.reference_text, 1))
+        self.ref_font_plus_btn.clicked.connect(
+            lambda: self.change_font_size(self.reference_text, 1)
+        )
 
         ref_layout.addWidget(self.ref_font_minus_btn)
         ref_layout.addWidget(self.ref_font_plus_btn)
@@ -213,7 +244,9 @@ class ASRApp(QMainWindow):
         # Pronunciation text box
         self.pronunciation_text = QTextEdit()
         self.pronunciation_text.setMaximumHeight(80)
-        self.pronunciation_text.setPlaceholderText("Enter text above to see English and IPA pronunciation...")
+        self.pronunciation_text.setPlaceholderText(
+            "Enter text above to see English and IPA pronunciation..."
+        )
         self.pronunciation_text.setReadOnly(True)
         self.pronunciation_text.setFont(QFont("Arial", 14))
         pron_layout.addWidget(self.pronunciation_text)
@@ -221,7 +254,9 @@ class ASRApp(QMainWindow):
         # Definition text box
         self.definition_text = QTextEdit()
         self.definition_text.setMaximumHeight(90)
-        self.definition_text.setPlaceholderText("Definition/translation will appear here...")
+        self.definition_text.setPlaceholderText(
+            "Definition/translation will appear here..."
+        )
         self.definition_text.setReadOnly(True)
         self.definition_text.setFont(QFont("Arial", 12))
         pron_layout.addWidget(self.definition_text)
@@ -229,7 +264,9 @@ class ASRApp(QMainWindow):
         # Grammar text box
         self.grammar_text = QTextEdit()
         self.grammar_text.setMaximumHeight(90)
-        self.grammar_text.setPlaceholderText("Grammar related to the reference text will appear here...")
+        self.grammar_text.setPlaceholderText(
+            "Grammar related to the reference text will appear here..."
+        )
         self.grammar_text.setReadOnly(True)
         self.grammar_text.setFont(QFont("Arial", 12))
         self.grammar_text.hide()
@@ -241,7 +278,9 @@ class ASRApp(QMainWindow):
         self.image_viewer.setMaximumWidth(800)
         self.image_viewer.setAlignment(Qt.AlignCenter)
         self.image_viewer.setText("No image loaded")
-        self.image_viewer.setStyleSheet("border: 1px solid gray; background-color: #f0f0f0;")
+        self.image_viewer.setStyleSheet(
+            "border: 1px solid gray; background-color: #f0f0f0;"
+        )
         self.image_viewer.hide()
         pron_layout.addWidget(self.image_viewer)
 
@@ -345,7 +384,9 @@ class ASRApp(QMainWindow):
         # Status text box
         self.status_text = QTextEdit()
         self.status_text.setMaximumHeight(60)
-        self.status_text.setPlaceholderText("Status and debug information will appear here...")
+        self.status_text.setPlaceholderText(
+            "Status and debug information will appear here..."
+        )
         self.status_text.setReadOnly(True)
         font = QFont("Consolas", 9)
         self.status_text.setFont(font)
@@ -422,8 +463,10 @@ class ASRApp(QMainWindow):
     def load_vocabulary_file(self):
         """Load vocabulary from text, CSV, or ZIP file"""
         filename, _ = QFileDialog.getOpenFileName(
-            self, "Select Vocabulary File", "",
-            "Vocabulary Files (*.txt *.csv *.zip);;All Files (*)"
+            self,
+            "Select Vocabulary File",
+            "",
+            "Vocabulary Files (*.txt *.csv *.zip);;All Files (*)",
         )
 
         if not filename:
@@ -432,18 +475,31 @@ class ASRApp(QMainWindow):
         try:
             from utils.storage import load_vocabulary_from_zip, load_csv
 
-            self.status_text.append(f"[{self.get_current_time()}] Loading vocabulary: {os.path.basename(filename)}")
+            self.status_text.append(
+                f"[{self.get_current_time()}] Loading vocabulary: {os.path.basename(filename)}"
+            )
 
             file_extension = Path(filename).suffix.lower()
 
             if file_extension == ".zip":
-                self.vocabulary_data, _ = load_vocabulary_from_zip(filename, self.config.get('vocab_columns'))
+                self.vocabulary_data, _ = load_vocabulary_from_zip(
+                    filename, self.config.get("vocab_columns")
+                )
             elif file_extension in [".txt", ".csv"]:
-                delimiter = self.config['vocab_delimiter']
-                column_mapping = self.config.get('vocab_columns')
-                self.vocabulary_data = load_csv(filename, delimiter=delimiter, has_header=True, column_mapping=column_mapping)
+                delimiter = self.config["vocab_delimiter"]
+                column_mapping = self.config.get("vocab_columns")
+                self.vocabulary_data = load_csv(
+                    filename,
+                    delimiter=delimiter,
+                    has_header=True,
+                    column_mapping=column_mapping,
+                )
             else:
-                QMessageBox.warning(self, "Unsupported Format", f"Unsupported file format: {file_extension}")
+                QMessageBox.warning(
+                    self,
+                    "Unsupported Format",
+                    f"Unsupported file format: {file_extension}",
+                )
                 return
 
             self.vocab_file_label.setText(os.path.basename(filename))
@@ -454,13 +510,21 @@ class ASRApp(QMainWindow):
                 self.prev_vocab_btn.setEnabled(False)
                 self.next_vocab_btn.setEnabled(len(self.vocabulary_data) > 1)
                 self.display_current_vocabulary()
-                self.status_text.append(f"[{self.get_current_time()}] Loaded {len(self.vocabulary_data)} vocabulary entries")
+                self.status_text.append(
+                    f"[{self.get_current_time()}] Loaded {len(self.vocabulary_data)} vocabulary entries"
+                )
             else:
-                QMessageBox.warning(self, "Empty File", "No vocabulary entries found in file")
+                QMessageBox.warning(
+                    self, "Empty File", "No vocabulary entries found in file"
+                )
 
         except Exception as e:
-            QMessageBox.critical(self, "Load Error", f"Failed to load vocabulary: {str(e)}")
-            self.status_text.append(f"[{self.get_current_time()}] Error loading vocabulary: {str(e)}")
+            QMessageBox.critical(
+                self, "Load Error", f"Failed to load vocabulary: {str(e)}"
+            )
+            self.status_text.append(
+                f"[{self.get_current_time()}] Error loading vocabulary: {str(e)}"
+            )
 
     def display_current_vocabulary(self):
         """Display the current vocabulary entry"""
@@ -470,35 +534,43 @@ class ASRApp(QMainWindow):
         entry = self.vocabulary_data[self.current_vocab_index]
 
         # Update reference text
-        self.reference_text.setText(entry.get('reference', ''))
+        self.reference_text.setText(entry.get("reference", ""))
 
         # Update definition
-        definition = entry.get('definition', '')
-        self.definition_text.setPlainText(clean_display_text(definition) if definition else "No definition available")
+        definition = entry.get("definition", "")
+        self.definition_text.setPlainText(
+            clean_display_text(definition) if definition else "No definition available"
+        )
 
         # Update grammar
-        grammar = entry.get('grammar', '')
-        self.grammar_text.setPlainText(clean_display_text(grammar) if grammar else "No grammar available")
+        grammar = entry.get("grammar", "")
+        self.grammar_text.setPlainText(
+            clean_display_text(grammar) if grammar else "No grammar available"
+        )
 
         # Update pronunciation
-        english_pron = entry.get('english_pronunciation', '')
-        ipa_pron = entry.get('ipa_pronunciation', '')
+        english_pron = entry.get("english_pronunciation", "")
+        ipa_pron = entry.get("ipa_pronunciation", "")
         if english_pron or ipa_pron:
-            combined_pron = f"English: {english_pron or 'N/A'}\nIPA:     {ipa_pron or 'N/A'}"
+            combined_pron = (
+                f"English: {english_pron or 'N/A'}\nIPA:     {ipa_pron or 'N/A'}"
+            )
             self.pronunciation_text.setPlainText(combined_pron)
         else:
             # Auto-generate IPA
             self.update_combined_pronunciation()
 
         # Handle image
-        if self.enable_image_cb.isChecked() and entry.get('image_filename', ''):
-            self.load_vocabulary_image(entry.get('image_filename', ''))
+        if self.enable_image_cb.isChecked() and entry.get("image_filename", ""):
+            self.load_vocabulary_image(entry.get("image_filename", ""))
         else:
             self.image_viewer.hide()
 
         # Update navigation
         self.prev_vocab_btn.setEnabled(self.current_vocab_index > 0)
-        self.next_vocab_btn.setEnabled(self.current_vocab_index < len(self.vocabulary_data) - 1)
+        self.next_vocab_btn.setEnabled(
+            self.current_vocab_index < len(self.vocabulary_data) - 1
+        )
 
     def previous_vocabulary(self):
         """Navigate to previous vocabulary entry"""
@@ -516,9 +588,10 @@ class ASRApp(QMainWindow):
         """Load and display vocabulary image"""
         try:
             # Implementation depends on whether image is in ZIP or filesystem
-            if self.vocab_file_path and self.vocab_file_path.endswith('.zip'):
+            if self.vocab_file_path and self.vocab_file_path.endswith(".zip"):
                 import zipfile
-                with zipfile.ZipFile(self.vocab_file_path, 'r') as zip_file:
+
+                with zipfile.ZipFile(self.vocab_file_path, "r") as zip_file:
                     # Try to find image
                     base = Path(image_filename).stem
                     for name in zip_file.namelist():
@@ -527,11 +600,13 @@ class ASRApp(QMainWindow):
                             pixmap = QPixmap()
                             pixmap.loadFromData(image_data)
                             if not pixmap.isNull():
-                                self.image_viewer.setPixmap(pixmap.scaled(
-                                    self.image_viewer.maximumWidth() - 20,
-                                    self.image_viewer.maximumHeight() - 20,
-                                    Qt.KeepAspectRatio
-                                ))
+                                self.image_viewer.setPixmap(
+                                    pixmap.scaled(
+                                        self.image_viewer.maximumWidth() - 20,
+                                        self.image_viewer.maximumHeight() - 20,
+                                        Qt.KeepAspectRatio,
+                                    )
+                                )
                                 self.image_viewer.show()
                             return
             else:
@@ -539,23 +614,26 @@ class ASRApp(QMainWindow):
                 image_path = Path(self.vocab_file_path).parent / image_filename
                 if image_path.exists():
                     pixmap = QPixmap(str(image_path))
-                    self.image_viewer.setPixmap(pixmap.scaled(
-                        self.image_viewer.maximumWidth() - 20,
-                        self.image_viewer.maximumHeight() - 20,
-                        Qt.KeepAspectRatio
-                    ))
+                    self.image_viewer.setPixmap(
+                        pixmap.scaled(
+                            self.image_viewer.maximumWidth() - 20,
+                            self.image_viewer.maximumHeight() - 20,
+                            Qt.KeepAspectRatio,
+                        )
+                    )
                     self.image_viewer.show()
 
         except Exception as e:
-            self.status_text.append(f"[{self.get_current_time()}] Image load error: {str(e)}")
+            self.status_text.append(
+                f"[{self.get_current_time()}] Image load error: {str(e)}"
+            )
 
     # ============== Audio Methods ==============
 
     def browse_file(self):
         """Browse for audio file"""
         filename, _ = QFileDialog.getOpenFileName(
-            self, "Select Audio File", "",
-            "Audio Files (*.wav *.mp3);;All Files (*)"
+            self, "Select Audio File", "", "Audio Files (*.wav *.mp3);;All Files (*)"
         )
         if filename:
             self.audio_file = filename
@@ -566,14 +644,14 @@ class ASRApp(QMainWindow):
     def start_recording(self):
         """Start audio recording"""
         self.output_text.setText("Recording...")
-        self.record_thread = RecordThread(sample_rate=self.config['sample_rate'])
+        self.record_thread = RecordThread(sample_rate=self.config["sample_rate"])
         self.record_thread.finished.connect(self.on_record_finished)
         self.record_thread.error.connect(self.on_error)
         self.record_thread.start()
 
     def stop_recording(self):
         """Stop audio recording"""
-        if hasattr(self, 'record_thread') and self.record_thread:
+        if hasattr(self, "record_thread") and self.record_thread:
             self.record_thread.stop_recording()
 
     def on_record_finished(self, filename):
@@ -613,7 +691,9 @@ class ASRApp(QMainWindow):
         if self.training_mode_cb.isChecked():
             reference = self.reference_text.text().strip()
             if not reference:
-                QMessageBox.warning(self, "No Reference", "Please enter reference text.")
+                QMessageBox.warning(
+                    self, "No Reference", "Please enter reference text."
+                )
                 return
 
         self.convert_btn.setEnabled(False)
@@ -624,7 +704,7 @@ class ASRApp(QMainWindow):
             self.config,
             self.punctuation_cb.isChecked(),
             self.word_time_cb.isChecked(),
-            reference
+            reference,
         )
         self.asr_thread.finished.connect(self.on_asr_finished)
         self.asr_thread.error.connect(self.on_error)
@@ -633,30 +713,32 @@ class ASRApp(QMainWindow):
     def on_asr_finished(self, text, metadata):
         """Handle ASR completion"""
         result = text
-        if 'word_times' in metadata:
-            result += "\n\n--- Word Timestamps ---\n" + metadata['word_times']
+        if "word_times" in metadata:
+            result += "\n\n--- Word Timestamps ---\n" + metadata["word_times"]
 
         self.output_text.setText(result)
 
         # Handle pronunciation feedback
-        if metadata and 'pronunciation' in metadata:
-            self.pronunciation_data = metadata['pronunciation']
-            self.display_pronunciation_feedback(metadata['pronunciation'])
+        if metadata and "pronunciation" in metadata:
+            self.pronunciation_data = metadata["pronunciation"]
+            self.display_pronunciation_feedback(metadata["pronunciation"])
             self.save_report_btn.setEnabled(True)
 
             # Save to session storage
-            self.session_storage.add_session({
-                'reference': metadata['pronunciation'].get('reference', ''),
-                'recognized': metadata['pronunciation'].get('recognized', ''),
-                'accuracy': metadata['pronunciation'].get('accuracy', 0)
-            })
+            self.session_storage.add_session(
+                {
+                    "reference": metadata["pronunciation"].get("reference", ""),
+                    "recognized": metadata["pronunciation"].get("recognized", ""),
+                    "accuracy": metadata["pronunciation"].get("accuracy", 0),
+                }
+            )
 
         self.convert_btn.setEnabled(True)
 
     def display_pronunciation_feedback(self, pron_data):
         """Display detailed pronunciation feedback"""
-        accuracy = pron_data['accuracy']
-        threshold = self.config['pronunciation_threshold']
+        accuracy = pron_data["accuracy"]
+        threshold = self.config["pronunciation_threshold"]
 
         # Update accuracy display
         self.accuracy_label.setText(f"{accuracy:.1f}%")
@@ -683,14 +765,14 @@ class ASRApp(QMainWindow):
         feedback += f"Recognized: {pron_data['recognized']}\n\n"
         feedback += "=== WORD-BY-WORD ANALYSIS ===\n\n"
 
-        word_analysis = pron_data.get('word_analysis', [])
+        word_analysis = pron_data.get("word_analysis", [])
         correct_count = 0
 
         for i, word_info in enumerate(word_analysis, 1):
-            status = word_info['status']
-            ref = word_info['reference']
-            rec = word_info['recognized']
-            sim = word_info['similarity']
+            status = word_info["status"]
+            ref = word_info["reference"]
+            rec = word_info["recognized"]
+            sim = word_info["similarity"]
 
             if status == "correct":
                 correct_count += 1
@@ -705,7 +787,9 @@ class ASRApp(QMainWindow):
         total = len(word_analysis)
         feedback += f"\n=== SUMMARY ===\n"
         feedback += f"Correct: {correct_count}/{total}\n"
-        feedback += f"Accuracy: {(correct_count/total*100) if total > 0 else 0:.1f}%\n"
+        feedback += (
+            f"Accuracy: {(correct_count / total * 100) if total > 0 else 0:.1f}%\n"
+        )
 
         self.feedback_text.setText(feedback)
         self.tabs.setCurrentIndex(1)
@@ -719,12 +803,16 @@ class ASRApp(QMainWindow):
             QMessageBox.warning(self, "No Text", "Please enter text.")
             return
 
-        lang_code = self.config['language'].split('-')[0].lower()
+        engine_name = self.config.get("tts_engine", "gTTS")
+        voice = self.config.get("tts_voice") if engine_name == "edge-tts" else None
+        lang_code = self.config["language"].split("-")[0].lower()
 
         try:
-            self.tts_thread = TTSThread(text, 'gTTS', lang_code)
+            self.tts_thread = TTSThread(text, engine_name, lang_code, voice=voice)
             self.tts_thread.start()
-            self.status_text.append(f"[{self.get_current_time()}] Playing TTS: {text[:50]}...")
+            self.status_text.append(
+                f"[{self.get_current_time()}] Playing TTS: {text[:50]}..."
+            )
         except Exception as e:
             QMessageBox.critical(self, "TTS Error", str(e))
 
@@ -735,38 +823,48 @@ class ASRApp(QMainWindow):
             QMessageBox.warning(self, "No Text", "Please enter text.")
             return
 
-        import re
-        words = re.findall(r'\S+', text)
+        engine_name = self.config.get("tts_engine", "gTTS")
+        voice = self.config.get("tts_voice") if engine_name == "edge-tts" else None
+        lang_code = self.config["language"].split("-")[0].lower()
 
-        lang_code = self.config['language'].split('-')[0].lower()
-
-        def play_words():
-            try:
-                for word in words:
-                    tts = gTTSEngine()
-                    tts.speak(word, lang_code, slow=True)
-                    time.sleep(0.5)
-            except Exception as e:
-                self.status_text.append(f"[{self.get_current_time()}] Slow TTS error: {str(e)}")
-
-        threading.Thread(target=play_words, daemon=True).start()
+        try:
+            self.tts_thread = TTSThread(
+                text, engine_name, lang_code, slow=True, voice=voice
+            )
+            self.tts_thread.start()
+            self.status_text.append(
+                f"[{self.get_current_time()}] Playing slow TTS: {text[:50]}..."
+            )
+        except Exception as e:
+            QMessageBox.critical(self, "TTS Error", str(e))
 
     # ============== Flashcard Methods ==============
 
     def show_flashcard_mode(self):
         """Open flashcard mode dialog"""
         if not self.vocabulary_data:
-            QMessageBox.warning(self, "No Vocabulary", "Please load a vocabulary file first.")
+            QMessageBox.warning(
+                self, "No Vocabulary", "Please load a vocabulary file first."
+            )
             return
 
-        dialog = FlashcardDialog(self.vocabulary_data, self.config, self, vocab_file_path=self.vocab_file_path)
+        dialog = FlashcardDialog(
+            self.vocabulary_data,
+            self.config,
+            self,
+            vocab_file_path=self.vocab_file_path,
+        )
         dialog.session_completed.connect(self.on_flashcard_session_completed)
         dialog.exec_()
 
     def on_flashcard_session_completed(self, stats):
         """Handle flashcard session completion"""
-        self.status_text.append(f"[{self.get_current_time()}] Flashcard session completed!")
-        self.status_text.append(f"[{self.get_current_time()}] Accuracy: {stats['accuracy']:.1f}%")
+        self.status_text.append(
+            f"[{self.get_current_time()}] Flashcard session completed!"
+        )
+        self.status_text.append(
+            f"[{self.get_current_time()}] Accuracy: {stats['accuracy']:.1f}%"
+        )
 
     def show_statistics(self):
         """Show learning statistics"""
@@ -782,7 +880,9 @@ class ASRApp(QMainWindow):
         try:
             english_text = self.reference_text.text().strip()
             if not english_text:
-                self.pronunciation_text.setPlainText("Enter text to see pronunciation...")
+                self.pronunciation_text.setPlainText(
+                    "Enter text to see pronunciation..."
+                )
                 return
 
             ipa_text = text_to_ipa_modern(english_text)
@@ -790,7 +890,9 @@ class ASRApp(QMainWindow):
             self.pronunciation_text.setPlainText(display_text)
 
         except Exception as e:
-            self.status_text.append(f"[{self.get_current_time()}] Pronunciation error: {str(e)}")
+            self.status_text.append(
+                f"[{self.get_current_time()}] Pronunciation error: {str(e)}"
+            )
 
     def change_font_size(self, text_widget, delta):
         """Change font size for text widgets"""
@@ -840,14 +942,16 @@ class ASRApp(QMainWindow):
             return
 
         filename, _ = QFileDialog.getSaveFileName(
-            self, "Save Report", "",
-            "Text Files (*.txt);;HTML Files (*.html);;All Files (*)"
+            self,
+            "Save Report",
+            "",
+            "Text Files (*.txt);;HTML Files (*.html);;All Files (*)",
         )
         if filename:
             report = generate_pronunciation_report(
                 self.pronunciation_data,
                 self.config,
-                {'timestamp': datetime.now().isoformat()}
+                {"timestamp": datetime.now().isoformat()},
             )
             if save_text_to_file(report, filename):
                 QMessageBox.information(self, "Success", "Report saved!")
@@ -905,6 +1009,6 @@ Built with PyQt5 and Python"""
     def closeEvent(self, event):
         """Handle application close"""
         # Save any pending data
-        if hasattr(self, 'flashcard_progress'):
+        if hasattr(self, "flashcard_progress"):
             self.flashcard_progress.save()
         event.accept()
