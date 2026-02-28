@@ -9,15 +9,27 @@ import random
 from datetime import datetime, timedelta
 from pathlib import Path
 from PyQt5.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QTextEdit, QProgressBar, QCheckBox, QSpinBox, QGroupBox,
-    QMessageBox, QDialog, QDialogButtonBox, QComboBox
+    QWidget,
+    QVBoxLayout,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QTextEdit,
+    QProgressBar,
+    QCheckBox,
+    QSpinBox,
+    QGroupBox,
+    QMessageBox,
+    QDialog,
+    QDialogButtonBox,
+    QComboBox,
 )
 from PyQt5.QtCore import Qt, pyqtSignal, QTimer
 from PyQt5.QtGui import QFont, QPixmap
 
 # Import TTS engines
 from core.tts_engines import TTSThread
+
 # Import recording functionality
 from core.recorder import RecordThread
 import sounddevice as sd
@@ -37,12 +49,14 @@ class FlashcardSession:
 
     def record_attempt(self, vocab_item, was_correct, accuracy_score):
         """Record an attempt on a flashcard"""
-        self.session_log.append({
-            'timestamp': datetime.now().isoformat(),
-            'vocab_item': vocab_item,
-            'correct': was_correct,
-            'accuracy': accuracy_score
-        })
+        self.session_log.append(
+            {
+                "timestamp": datetime.now().isoformat(),
+                "vocab_item": vocab_item,
+                "correct": was_correct,
+                "accuracy": accuracy_score,
+            }
+        )
         if was_correct:
             self.correct_count += 1
         else:
@@ -52,13 +66,13 @@ class FlashcardSession:
         """Get session statistics"""
         total = self.correct_count + self.incorrect_count
         if total == 0:
-            return {'accuracy': 0, 'total': 0}
+            return {"accuracy": 0, "total": 0}
         return {
-            'accuracy': (self.correct_count / total) * 100,
-            'total': total,
-            'correct': self.correct_count,
-            'incorrect': self.incorrect_count,
-            'duration_seconds': (datetime.now() - self.start_time).total_seconds()
+            "accuracy": (self.correct_count / total) * 100,
+            "total": total,
+            "correct": self.correct_count,
+            "incorrect": self.incorrect_count,
+            "duration_seconds": (datetime.now() - self.start_time).total_seconds(),
         }
 
 
@@ -68,7 +82,7 @@ class FlashcardProgress:
     Implements spaced repetition algorithm
     """
 
-    def __init__(self, storage_path='Data/flashcard_progress.json'):
+    def __init__(self, storage_path="Data/flashcard_progress.json"):
         self.storage_path = storage_path
         self.items = {}  # {item_id: progress_data}
         self.load()
@@ -76,56 +90,55 @@ class FlashcardProgress:
     def load(self):
         """Load progress from storage"""
         try:
-            with open(self.storage_path, 'r', encoding='utf-8') as f:
+            with open(self.storage_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
-                self.items = data.get('items', {})
+                self.items = data.get("items", {})
         except FileNotFoundError:
             self.items = {}
 
     def save(self):
         """Save progress to storage"""
-        data = {
-            'last_saved': datetime.now().isoformat(),
-            'items': self.items
-        }
-        with open(self.storage_path, 'w', encoding='utf-8') as f:
+        data = {"last_saved": datetime.now().isoformat(), "items": self.items}
+        with open(self.storage_path, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
 
     def update_item(self, item_id, was_correct, accuracy_score):
         """Update progress for an item"""
         if item_id not in self.items:
             self.items[item_id] = {
-                'created': datetime.now().isoformat(),
-                'attempts': 0,
-                'correct_count': 0,
-                'total_accuracy': 0,
-                'last_reviewed': None,
-                'next_review': datetime.now().isoformat(),
-                'difficulty_level': 1,  # 1-5
-                'streak': 0
+                "created": datetime.now().isoformat(),
+                "attempts": 0,
+                "correct_count": 0,
+                "total_accuracy": 0,
+                "last_reviewed": None,
+                "next_review": datetime.now().isoformat(),
+                "difficulty_level": 1,  # 1-5
+                "streak": 0,
             }
 
         item = self.items[item_id]
-        item['attempts'] += 1
-        item['last_reviewed'] = datetime.now().isoformat()
-        item['total_accuracy'] += accuracy_score
+        item["attempts"] += 1
+        item["last_reviewed"] = datetime.now().isoformat()
+        item["total_accuracy"] += accuracy_score
 
         if was_correct:
-            item['correct_count'] += 1
-            item['streak'] += 1
-            item['difficulty_level'] = min(5, item['difficulty_level'] + 1)
+            item["correct_count"] += 1
+            item["streak"] += 1
+            item["difficulty_level"] = min(5, item["difficulty_level"] + 1)
         else:
-            item['streak'] = 0
-            item['difficulty_level'] = max(1, item['difficulty_level'] - 1)
+            item["streak"] = 0
+            item["difficulty_level"] = max(1, item["difficulty_level"] - 1)
 
         # Calculate next review (spaced repetition)
         days_until_review = self._calculate_review_interval(item)
-        item['next_review'] = (datetime.now() + timedelta(days=days_until_review)).isoformat()
+        item["next_review"] = (
+            datetime.now() + timedelta(days=days_until_review)
+        ).isoformat()
 
     def _calculate_review_interval(self, item):
         """Calculate days until next review based on performance"""
-        streak = item['streak']
-        difficulty = item['difficulty_level']
+        streak = item["streak"]
+        difficulty = item["difficulty_level"]
 
         # Base intervals in days
         intervals = [1, 3, 7, 14, 30]
@@ -145,9 +158,9 @@ class FlashcardProgress:
         now = datetime.now().isoformat()
         due = []
         for item in vocab_list:
-            item_id = item.get('reference', str(item))
+            item_id = item.get("reference", str(item))
             if item_id in self.items:
-                if self.items[item_id]['next_review'] <= now:
+                if self.items[item_id]["next_review"] <= now:
                     due.append(item)
             else:
                 due.append(item)  # New items are always due
@@ -157,22 +170,30 @@ class FlashcardProgress:
         """Get overall learning statistics"""
         if not self.items:
             return {
-                'total_items': 0,
-                'mastered': 0,
-                'learning': 0,
-                'average_accuracy': 0
+                "total_items": 0,
+                "mastered": 0,
+                "learning": 0,
+                "average_accuracy": 0,
             }
 
         total = len(self.items)
-        mastered = sum(1 for item in self.items.values() if item['difficulty_level'] >= 4)
-        avg_accuracy = sum(item['total_accuracy'] / item['attempts']
-                          for item in self.items.values() if item['attempts'] > 0) / total
+        mastered = sum(
+            1 for item in self.items.values() if item["difficulty_level"] >= 4
+        )
+        avg_accuracy = (
+            sum(
+                item["total_accuracy"] / item["attempts"]
+                for item in self.items.values()
+                if item["attempts"] > 0
+            )
+            / total
+        )
 
         return {
-            'total_items': total,
-            'mastered': mastered,
-            'learning': total - mastered,
-            'average_accuracy': avg_accuracy
+            "total_items": total,
+            "mastered": mastered,
+            "learning": total - mastered,
+            "average_accuracy": avg_accuracy,
         }
 
 
@@ -181,6 +202,7 @@ class FlashcardDialog(QDialog):
     Flashcard Mode dialog
     Interactive learning mode with pronunciation practice
     """
+
     session_completed = pyqtSignal(dict)
 
     def __init__(self, vocab_data, config, parent=None, vocab_file_path=None):
@@ -188,23 +210,28 @@ class FlashcardDialog(QDialog):
         self.vocab_data = vocab_data
         self.config = config
         self.vocab_file_path = vocab_file_path
-        self.progress = FlashcardProgress(storage_path='Data/flashcard_progress.json')
+        self.progress = FlashcardProgress(storage_path="Data/flashcard_progress.json")
         self.session = None
         self.current_card = None
         self.showing_front = True  # True = word, False = definition
-        
+
+        # Cache for default logo image
+        self.default_logo_pixmap = None
+
         # Initialize TTS engine
         from core.tts_engines import gTTSEngine, TTSThread
+
         self.tts_engine = gTTSEngine()
         self.tts_thread = None
-        
+
         # Initialize recording attributes
         self.record_thread = None
         self.recorded_file = None
         self.audio_file = None
-        
+
         # Initialize ASR attributes for pronunciation feedback
         from core.asr_engines import ASRThread
+
         self.asr_thread = None
         self.pronunciation_data = None
         self.has_pronunciation_feedback = False
@@ -238,12 +265,12 @@ class FlashcardDialog(QDialog):
 
         # Top right controls for front card
         front_top_layout = QHBoxLayout()
-        
+
         self.enable_image_cb = QCheckBox("Enable Image")
         self.enable_image_cb.setChecked(True)
         # self.enable_image_cb.toggled.connect(self.toggle_image_display) # Removed old connection
         front_top_layout.addWidget(self.enable_image_cb)
-        
+
         front_top_layout.addStretch()
         self.front_config_btn = QPushButton("⚙️")
         self.front_config_btn.setFixedSize(30, 30)
@@ -302,12 +329,13 @@ class FlashcardDialog(QDialog):
         # Center: Image display
         self.image_label = QLabel()
         self.image_label.setAlignment(Qt.AlignCenter)
-        self.image_label.setScaledContents(False) # Important for manual scaling
+        self.image_label.setScaledContents(False)  # Important for manual scaling
         self.image_label.setMinimumSize(200, 200)
         self.image_label.setText("Image disabled")
-        self.image_label.setStyleSheet("border: 1px solid gray; background-color: #f0f0f0;")
+        self.image_label.setStyleSheet(
+            "border: 1px solid gray; background-color: #f0f0f0;"
+        )
         front_card_layout.addWidget(self.image_label)
-
 
         # Under Image: Recording controls
         record_layout = QHBoxLayout()
@@ -329,12 +357,16 @@ class FlashcardDialog(QDialog):
         nav_layout = QHBoxLayout()
 
         self.prev_btn = QPushButton("◀ Previous")
-        self.prev_btn.setStyleSheet("background-color: #4CAF50; color: white; font-weight: bold; padding: 10px;")
+        self.prev_btn.setStyleSheet(
+            "background-color: #4CAF50; color: white; font-weight: bold; padding: 10px;"
+        )
         self.prev_btn.clicked.connect(self.previous_card)
         nav_layout.addWidget(self.prev_btn)
 
         self.flip_btn = QPushButton("Show ▶")
-        self.flip_btn.setStyleSheet("background-color: #2196F3; color: white; font-weight: bold; padding: 10px;")
+        self.flip_btn.setStyleSheet(
+            "background-color: #2196F3; color: white; font-weight: bold; padding: 10px;"
+        )
         self.flip_btn.setShortcut("Space")
         self.flip_btn.clicked.connect(self.flip_card)
         nav_layout.addWidget(self.flip_btn)
@@ -409,7 +441,7 @@ class FlashcardDialog(QDialog):
         feedback_layout.addWidget(self.feedback_progress)
 
         back_card_layout.addLayout(feedback_layout)
-        
+
         # Detailed pronunciation feedback text box
         self.pronunciation_feedback_text = QTextEdit()
         self.pronunciation_feedback_text.setReadOnly(True)
@@ -423,17 +455,23 @@ class FlashcardDialog(QDialog):
         rating_layout = QHBoxLayout()
 
         self.unknown_btn = QPushButton("Unknown")
-        self.unknown_btn.setStyleSheet("background-color: #f44336; color: white; font-weight: bold; padding: 10px;")
+        self.unknown_btn.setStyleSheet(
+            "background-color: #f44336; color: white; font-weight: bold; padding: 10px;"
+        )
         self.unknown_btn.clicked.connect(lambda: self.rate_difficulty(1))
         rating_layout.addWidget(self.unknown_btn)
 
         self.partial_btn = QPushButton("Partially Known")
-        self.partial_btn.setStyleSheet("background-color: #FFC107; color: black; font-weight: bold; padding: 10px;")
+        self.partial_btn.setStyleSheet(
+            "background-color: #FFC107; color: black; font-weight: bold; padding: 10px;"
+        )
         self.partial_btn.clicked.connect(lambda: self.rate_difficulty(2))
         rating_layout.addWidget(self.partial_btn)
 
         self.know_btn = QPushButton("Know")
-        self.know_btn.setStyleSheet("background-color: #4CAF50; color: white; font-weight: bold; padding: 10px;")
+        self.know_btn.setStyleSheet(
+            "background-color: #4CAF50; color: white; font-weight: bold; padding: 10px;"
+        )
         self.know_btn.clicked.connect(lambda: self.rate_difficulty(3))
         rating_layout.addWidget(self.know_btn)
 
@@ -486,15 +524,15 @@ class FlashcardDialog(QDialog):
         self.back_card_group.hide()
 
         # Show front card with word/phrase
-        front = item.get('reference', 'N/A')
+        front = item.get("reference", "N/A")
         self.front_word_label.setText(front)
-        self.pronunciation_label.setText(item.get('ipa_pronunciation', ''))
+        self.pronunciation_label.setText(item.get("ipa_pronunciation", ""))
 
         # Disconnect any previous connections to avoid multiple calls
         try:
             self.enable_image_cb.toggled.disconnect()
         except TypeError:
-            pass # No connection to disconnect
+            pass  # No connection to disconnect
 
         # Connect the checkbox to the image display logic, passing the current item
         self.enable_image_cb.toggled.connect(
@@ -527,9 +565,9 @@ class FlashcardDialog(QDialog):
             self.back_card_group.show()
 
             # Update back card content
-            self.back_word_label.setText(item.get('reference', 'N/A'))
-            self.back_pronunciation_label.setText(item.get('ipa_pronunciation', ''))
-            self.definition_text.setText(item.get('definition', 'No definition'))
+            self.back_word_label.setText(item.get("reference", "N/A"))
+            self.back_pronunciation_label.setText(item.get("ipa_pronunciation", ""))
+            self.definition_text.setText(item.get("definition", "No definition"))
 
             # Only reset feedback if no pronunciation feedback exists yet
             # Otherwise, preserve the existing pronunciation feedback
@@ -540,10 +578,10 @@ class FlashcardDialog(QDialog):
             else:
                 # If we have pronunciation feedback, make sure it's visible
                 self.pronunciation_feedback_text.show()
-                
+
                 # Also make sure the progress bar shows the correct score
-                if self.pronunciation_data and 'accuracy' in self.pronunciation_data:
-                    accuracy = self.pronunciation_data['accuracy']
+                if self.pronunciation_data and "accuracy" in self.pronunciation_data:
+                    accuracy = self.pronunciation_data["accuracy"]
                     self.feedback_progress.setValue(int(accuracy))
         else:
             # Go back to front
@@ -553,7 +591,7 @@ class FlashcardDialog(QDialog):
         """Rate the difficulty of the current card"""
         if self.current_card < len(self.vocab_data):
             item = self.vocab_data[self.current_card]
-            item_id = item.get('reference', str(item))
+            item_id = item.get("reference", str(item))
 
             was_correct = rating >= 3
             accuracy = 100 if was_correct else 50
@@ -589,41 +627,43 @@ class FlashcardDialog(QDialog):
         """Play TTS for the current card"""
         if not self.current_item:
             return
-            
+
         # Get the text to speak (the reference word/phrase)
-        text = self.current_item.get('reference', '').strip()
+        text = self.current_item.get("reference", "").strip()
         if not text:
             return
-            
+
         # Get language from config
-        lang_code = self.config['language'].split('-')[0].lower()
-        
+        lang_code = self.config["language"].split("-")[0].lower()
+
         # Create and start TTS thread
-        self.tts_thread = TTSThread(text, 'gTTS', lang_code)
+        self.tts_thread = TTSThread(text, "gTTS", lang_code)
         self.tts_thread.start()
 
     def play_slow_tts(self):
         """Play TTS slowly for the current card"""
         if not self.current_item:
             return
-            
+
         # Get the text to speak (the reference word/phrase)
-        text = self.current_item.get('reference', '').strip()
+        text = self.current_item.get("reference", "").strip()
         if not text:
             return
-            
+
         # Get language from config
-        lang_code = self.config['language'].split('-')[0].lower()
-        
+        lang_code = self.config["language"].split("-")[0].lower()
+
         # Create and start TTS thread with slow speed
-        self.tts_thread = TTSThread(text, 'gTTS', lang_code, slow=True)
+        self.tts_thread = TTSThread(text, "gTTS", lang_code, slow=True)
         self.tts_thread.start()
 
     def toggle_recording(self):
         """Toggle recording mode"""
         if self.record_btn.isChecked():
             # Start recording
-            self.record_thread = RecordThread(sample_rate=self.config.get('sample_rate', 16000))
+            self.record_thread = RecordThread(
+                sample_rate=self.config.get("sample_rate", 16000)
+            )
             self.record_thread.finished.connect(self.on_record_finished)
             self.record_thread.error.connect(self.on_record_error)
             self.record_thread.start()
@@ -637,12 +677,12 @@ class FlashcardDialog(QDialog):
         self.recorded_file = filename
         self.audio_file = filename
         # Update UI elements
-        if hasattr(self, 'playback_btn'):
+        if hasattr(self, "playback_btn"):
             self.playback_btn.setEnabled(True)
-        
+
         # Automatically convert the recorded audio for pronunciation feedback
         self.convert_audio_for_feedback()
-        
+
     def on_record_error(self, error_msg):
         """Handle recording errors"""
         print(f"Recording error: {error_msg}")
@@ -651,23 +691,26 @@ class FlashcardDialog(QDialog):
         """Play back user recording"""
         if not self.audio_file:
             from PyQt5.QtWidgets import QMessageBox
+
             QMessageBox.warning(self, "No Audio", "Please record audio first.")
             return
 
         try:
             data, samplerate = sf.read(self.audio_file)
             sd.play(data, samplerate)
-            
+
             # After playing, automatically convert the audio for pronunciation feedback
             self.convert_audio_for_feedback()
         except Exception as e:
             from PyQt5.QtWidgets import QMessageBox
+
             QMessageBox.critical(self, "Playback Error", str(e))
 
     def convert_audio_for_feedback(self):
         """Convert recorded audio to text and get pronunciation feedback"""
         if not self.audio_file:
             from PyQt5.QtWidgets import QMessageBox
+
             QMessageBox.warning(self, "No Audio", "Please record audio first.")
             return
 
@@ -675,20 +718,24 @@ class FlashcardDialog(QDialog):
         if not self.current_item:
             return
 
-        reference_text = self.current_item.get('reference', '').strip()
+        reference_text = self.current_item.get("reference", "").strip()
         if not reference_text:
             from PyQt5.QtWidgets import QMessageBox
-            QMessageBox.warning(self, "No Reference", "No reference text available for comparison.")
+
+            QMessageBox.warning(
+                self, "No Reference", "No reference text available for comparison."
+            )
             return
 
         # Start ASR conversion with reference text for pronunciation feedback
         from core.asr_engines import ASRThread
+
         self.asr_thread = ASRThread(
             self.audio_file,
             self.config,
             show_punctuation=True,
             show_word_time=False,
-            reference_text=reference_text
+            reference_text=reference_text,
         )
         self.asr_thread.finished.connect(self.on_asr_finished_for_feedback)
         self.asr_thread.error.connect(self.on_asr_error)
@@ -698,19 +745,20 @@ class FlashcardDialog(QDialog):
         """Handle ASR completion and display pronunciation feedback"""
         # Update the text display if needed
         # Handle pronunciation feedback
-        if metadata and 'pronunciation' in metadata:
-            self.pronunciation_data = metadata['pronunciation']
-            self.display_pronunciation_feedback(metadata['pronunciation'])
+        if metadata and "pronunciation" in metadata:
+            self.pronunciation_data = metadata["pronunciation"]
+            self.display_pronunciation_feedback(metadata["pronunciation"])
 
     def on_asr_error(self, error_msg):
         """Handle ASR errors"""
         print(f"ASR Error: {error_msg}")
         from PyQt5.QtWidgets import QMessageBox
+
         QMessageBox.critical(self, "ASR Error", f"Error processing audio: {error_msg}")
 
     def display_pronunciation_feedback(self, pron_data):
         """Display detailed pronunciation feedback similar to main window"""
-        accuracy = pron_data['accuracy']
+        accuracy = pron_data["accuracy"]
 
         # Make sure accuracy is a valid number between 0 and 100
         accuracy = max(0, min(100, float(accuracy)))
@@ -752,14 +800,14 @@ class FlashcardDialog(QDialog):
         feedback += f"Recognized: {pron_data['recognized']}\n\n"
         feedback += "=== WORD-BY-WORD ANALYSIS ===\n\n"
 
-        word_analysis = pron_data.get('word_analysis', [])
+        word_analysis = pron_data.get("word_analysis", [])
         correct_count = 0
 
         for i, word_info in enumerate(word_analysis, 1):
-            status = word_info['status']
-            ref = word_info['reference']
-            rec = word_info['recognized']
-            sim = word_info['similarity']
+            status = word_info["status"]
+            ref = word_info["reference"]
+            rec = word_info["recognized"]
+            sim = word_info["similarity"]
 
             if status == "correct":
                 correct_count += 1
@@ -774,12 +822,14 @@ class FlashcardDialog(QDialog):
         total = len(word_analysis)
         feedback += f"\n=== SUMMARY ===\n"
         feedback += f"Correct: {correct_count}/{total}\n"
-        feedback += f"Accuracy: {(correct_count/total*100) if total > 0 else 0:.1f}%\n"
+        feedback += (
+            f"Accuracy: {(correct_count / total * 100) if total > 0 else 0:.1f}%\n"
+        )
 
         # Display the feedback text
         self.pronunciation_feedback_text.setPlainText(feedback)
         self.pronunciation_feedback_text.show()
-        
+
         # Make sure the back card group is visible if we're currently showing the front
         if self.showing_front:
             # Store the fact that we have feedback for when the card is flipped
@@ -794,25 +844,38 @@ class FlashcardDialog(QDialog):
             self.pronunciation_label.show()
         else:
             self.pronunciation_label.hide()
-            
+
     def toggle_image_display(self, enabled, item=None):
         if enabled:
-            if item and item.get('image_filename'):
-                self.load_vocabulary_image(item.get('image_filename'))
+            if item and item.get("image_filename"):
+                self.load_vocabulary_image(item.get("image_filename"))
             else:
-                self.image_label.setText("No Image")
-                self.image_label.setPixmap(QPixmap()) # Clear pixmap
+                # Use default logo instead of text
+                default_pixmap = self.load_default_logo()
+                if default_pixmap and not default_pixmap.isNull():
+                    self.image_label.setPixmap(
+                        default_pixmap.scaled(
+                            self.image_label.width() - 2,
+                            self.image_label.height() - 2,
+                            Qt.KeepAspectRatio,
+                            Qt.SmoothTransformation,
+                        )
+                    )
+                else:
+                    self.image_label.setText("No Image")
+                    self.image_label.setPixmap(QPixmap())  # Clear pixmap
         else:
             self.image_label.setText("Image disabled")
-            self.image_label.setPixmap(QPixmap()) # Clear pixmap
-    
+            self.image_label.setPixmap(QPixmap())  # Clear pixmap
+
     def load_vocabulary_image(self, image_filename):
         """Load and display vocabulary image"""
         try:
             # Implementation depends on whether image is in ZIP or filesystem
-            if self.vocab_file_path and self.vocab_file_path.endswith('.zip'):
+            if self.vocab_file_path and self.vocab_file_path.endswith(".zip"):
                 import zipfile
-                with zipfile.ZipFile(self.vocab_file_path, 'r') as zip_file:
+
+                with zipfile.ZipFile(self.vocab_file_path, "r") as zip_file:
                     # Try to find image
                     base = Path(image_filename).stem
                     for name in zip_file.namelist():
@@ -821,11 +884,14 @@ class FlashcardDialog(QDialog):
                             pixmap = QPixmap()
                             pixmap.loadFromData(image_data)
                             if not pixmap.isNull():
-                                self.image_label.setPixmap(pixmap.scaled(
-                                    self.image_label.width() - 2,
-                                    self.image_label.height() - 2,
-                                    Qt.KeepAspectRatio, Qt.SmoothTransformation
-                                ))
+                                self.image_label.setPixmap(
+                                    pixmap.scaled(
+                                        self.image_label.width() - 2,
+                                        self.image_label.height() - 2,
+                                        Qt.KeepAspectRatio,
+                                        Qt.SmoothTransformation,
+                                    )
+                                )
                             return
             else:
                 # Load from filesystem
@@ -834,15 +900,63 @@ class FlashcardDialog(QDialog):
                     if image_path.exists():
                         pixmap = QPixmap(str(image_path))
                         if not pixmap.isNull():
-                            self.image_label.setPixmap(pixmap.scaled(
-                                self.image_label.width() -2,
-                                self.image_label.height() - 2,
-                                Qt.KeepAspectRatio, Qt.SmoothTransformation
-                            ))
+                            self.image_label.setPixmap(
+                                pixmap.scaled(
+                                    self.image_label.width() - 2,
+                                    self.image_label.height() - 2,
+                                    Qt.KeepAspectRatio,
+                                    Qt.SmoothTransformation,
+                                )
+                            )
+                            return
+                    else:
+                        # Image file not found - use default logo
+                        default_pixmap = self.load_default_logo()
+                        if default_pixmap and not default_pixmap.isNull():
+                            self.image_label.setPixmap(
+                                default_pixmap.scaled(
+                                    self.image_label.width() - 2,
+                                    self.image_label.height() - 2,
+                                    Qt.KeepAspectRatio,
+                                    Qt.SmoothTransformation,
+                                )
+                            )
+                        return
 
         except Exception as e:
             print(f"Image load error: {e}")
-            self.image_label.setText("Image load error")
+            # Fallback to default logo
+            default_pixmap = self.load_default_logo()
+            if default_pixmap and not default_pixmap.isNull():
+                self.image_label.setPixmap(
+                    default_pixmap.scaled(
+                        self.image_label.width() - 2,
+                        self.image_label.height() - 2,
+                        Qt.KeepAspectRatio,
+                        Qt.SmoothTransformation,
+                    )
+                )
+            else:
+                self.image_label.setText("Image load error")
+
+    def load_default_logo(self):
+        """Load and cache the default logo image"""
+        # Return cached version if already loaded
+        if self.default_logo_pixmap is not None:
+            return self.default_logo_pixmap
+
+        try:
+            logo_path = Path("Data") / "Logo.png"
+            if logo_path.exists():
+                pixmap = QPixmap(str(logo_path))
+                if not pixmap.isNull():
+                    # Cache the original pixmap (unscaled)
+                    self.default_logo_pixmap = pixmap
+                    return pixmap
+        except Exception as e:
+            print(f"Default logo load error: {e}")
+
+        return None
 
     def show_settings(self):
         """Show settings dialog"""
@@ -935,7 +1049,9 @@ class FlashcardStatsDialog(QDialog):
         stats_layout.addWidget(QLabel(f"Total Items: {stats['total_items']}"))
         stats_layout.addWidget(QLabel(f"Mastered: {stats['mastered']}"))
         stats_layout.addWidget(QLabel(f"Learning: {stats['learning']}"))
-        stats_layout.addWidget(QLabel(f"Average Accuracy: {stats['average_accuracy']:.1f}%"))
+        stats_layout.addWidget(
+            QLabel(f"Average Accuracy: {stats['average_accuracy']:.1f}%")
+        )
 
         stats_group.setLayout(stats_layout)
         layout.addWidget(stats_group)
