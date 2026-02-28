@@ -236,6 +236,10 @@ class FlashcardDialog(QDialog):
         self.pronunciation_data = None
         self.has_pronunciation_feedback = False
 
+        # Back card TTS buttons
+        self.back_play_tts_btn = None
+        self.back_play_slow_tts_btn = None
+
         self.setWindowTitle("Flashcard Mode")
         self.setMinimumSize(600, 500)
         self.init_ui()
@@ -420,6 +424,19 @@ class FlashcardDialog(QDialog):
         self.back_pronunciation_label.setFont(QFont("Arial", 14))
         back_card_layout.addWidget(self.back_pronunciation_label)
 
+        # Under Pronunciation: TTS buttons (on back card)
+        back_tts_layout = QHBoxLayout()
+
+        self.back_play_tts_btn = QPushButton("🔊 Play")
+        self.back_play_tts_btn.clicked.connect(self.play_tts)
+        back_tts_layout.addWidget(self.back_play_tts_btn)
+
+        self.back_play_slow_tts_btn = QPushButton("🐛 Slow")
+        self.back_play_slow_tts_btn.clicked.connect(self.play_slow_tts)
+        back_tts_layout.addWidget(self.back_play_slow_tts_btn)
+
+        back_card_layout.addLayout(back_tts_layout)
+
         # Under Pronunciation: Definition/Translation
         self.definition_text = QTextEdit()
         self.definition_text.setReadOnly(True)
@@ -550,6 +567,12 @@ class FlashcardDialog(QDialog):
         self.playback_btn.setEnabled(False)
         self.record_btn.setEnabled(True)
         self.record_btn.setChecked(False)
+
+        # Enable/disable back card TTS buttons
+        if self.back_play_tts_btn:
+            self.back_play_tts_btn.setEnabled(True)
+        if self.back_play_slow_tts_btn:
+            self.back_play_slow_tts_btn.setEnabled(True)
 
         # Store item for flip
         self.current_item = item
