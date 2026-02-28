@@ -9,7 +9,7 @@ An advanced speech recognition application with pronunciation training capabilit
 - **Pronunciation Training**: Interactive pronunciation practice with detailed feedback
 - **Flashcard Mode**: Spaced repetition learning with progress tracking and statistics
 - **Vocabulary Management**: Load and navigate through vocabulary sets from CSV/ZIP files
-- **Image Support**: Display images associated with vocabulary entries
+- **Image Support**: Display images associated with vocabulary entries; includes default logo fallback when images are missing
 - **Grammar Display**: Show grammatical information alongside vocabulary entries
 
 ### 📚 Vocabulary System
@@ -36,6 +36,11 @@ An advanced speech recognition application with pronunciation training capabilit
   - Supported formats: PNG, JPG, JPEG, GIF
   - Images displayed on the front of flashcards for visual context
   - Images loaded from ZIP archives with "images" subdirectory support
+  - **Default Logo Fallback**: Shows application logo when vocabulary images are unavailable
+- **Backside TTS Controls**: Play and Slow Play buttons for pronunciation review
+  - TTS buttons located under pronunciation on card back
+  - Replay word pronunciation after revealing definition
+  - Normal and slow speed options for learning
 
 ### ⚙️ Configuration
 - Customizable column mappings for vocabulary files
@@ -154,6 +159,7 @@ python main.py
 - Support for common image formats (PNG, JPG, GIF)
 - Automatic loading from ZIP archive structures
 - **Flashcard Image Display**: Images automatically shown on flashcard fronts when available
+- **Default Logo Fallback**: When images are missing or fail to load, displays `Data/Logo.png` as a fallback
 
 ## Modular Architecture (Version 3.0)
 
@@ -418,6 +424,8 @@ This modular structure enables:
 - Improved vocabulary loading and management
 - Enhanced user interface responsiveness
 - Better progress tracking and statistics
+- **Flashcard Image Improvements**: Default logo fallback when vocabulary images unavailable
+- **Flashcard Backside TTS**: Added Play and Slow Play buttons under pronunciation for audio review
 
 For complete version history and detailed changes, consult the git commit log.
 
