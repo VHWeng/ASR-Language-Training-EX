@@ -151,11 +151,14 @@ world|The earth|wurld|wɜrld|Planet Earth|world.png|Noun, singular
 1. **Card Display**: Cards show either the word or definition first (selectable)
 2. **Flip Card**: Click "Flip" or press Space to reveal the other side
 3. **Listen**: Click 🔊 to hear the pronunciation
+   - **Front**: Play and Slow buttons for TTS
+   - **Back**: Additional Play and Slow buttons under pronunciation for review
 4. **Practice**: Click 🎤 to record your pronunciation
 5. **View Images**: If vocabulary items include images, they will be displayed on the card:
    - Images are shown on the front of the card when displaying the word
    - Images appear automatically when available
    - Supported formats: PNG, JPG, JPEG, GIF
+   - If a vocabulary image is missing or unavailable, the application logo (Data/Logo.png) is displayed as a fallback
    - Images are displayed at appropriate size for the card layout
 6. **Rate Difficulty**: After flipping, rate how well you knew the card:
    - **Again**: Didn't know it - will appear again soon
@@ -214,6 +217,7 @@ Click the 📊 (statistics) icon to view:
 - Check supported formats (.png, .jpg, .jpeg, .gif)
 - Verify column 6 contains correct relative filenames
 - Check file permissions and path encoding
+- Note: If vocabulary images are missing, the application logo (Data/Logo.png) will be displayed as a fallback
 
 #### Flashcard Issues
 **Progress Not Saving**
@@ -288,7 +292,10 @@ A: Cards rated "Easy" appear less frequently, while cards rated "Again" appear s
 A: Currently, progress is stored locally. Export functionality is planned for future releases.
 
 **Q: How do I know if a vocabulary item has an image?**
-A: When loading vocabulary, items with images will be indicated in the status area. In flashcard mode, images will automatically appear when the card displays the word or definition.
+A: When loading vocabulary, items with images will be indicated in the status area. In flashcard mode, images will automatically appear when the card displays the word or definition. If an image is missing, the application logo is shown instead.
+
+**Q: Are there TTS controls on both sides of the flashcard?**
+A: Yes! The front of the card has Play and Slow TTS buttons below the word. The back of the card also has Play and Slow TTS buttons directly under the pronunciation label, allowing you to replay the pronunciation after seeing the definition.
 
 ## 📞 Support
 
