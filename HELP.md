@@ -228,6 +228,18 @@ Note: Edge TTS voices are provided by Microsoft and require internet connectivit
 - **Slow Speed**: Click `🐢 Slow TTS` for slower articulation (helpful for learning)
 - **Flashcard Mode**: TTS buttons appear on the back of cards for review after revealing the answer
 
+### Polytonic Greek Normalization
+
+When using **edge-tts** with **Greek language (el)** or a **Multilingual** voice, the application can automatically normalize polytonic (ancient/ecclesiastical) Greek text to monotonic for better pronunciation.
+
+- **Purpose**: Some TTS engines do not handle polytonic diacritics (breathing marks, multiple accents). Normalization ensures clearer speech.
+- **Enable/Disable**: In Configuration ⚙ → TTS section, check/uncheck "Normalize polytonic Greek text for edge-tts". Enabled by default.
+- **Scope**: Only applies to edge-tts engine when the language is Greek (el-GR) or the selected voice name contains "Multilingual".
+- **Example**:
+  - Polytonic: `ἐν ἀρχῇ ἦν`
+  - Normalized: `εν αρχη ην`
+- **Manual override**: Uncheck the box to play original polytonic text (if your TTS supports it).
+
 ## 🔧 Troubleshooting
 
 ### Common Issues

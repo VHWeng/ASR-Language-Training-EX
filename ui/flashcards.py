@@ -657,6 +657,19 @@ class FlashcardDialog(QDialog):
         voice = self.config.get("tts_voice") if engine_name == "edge-tts" else None
         lang_code = self.config["language"].split("-")[0].lower()
 
+        # Normalize polytonic Greek for edge-tts if enabled
+        if (
+            self.config.get("normalize_tts", True)
+            and engine_name == "edge-tts"
+            and (
+                lang_code.startswith("el")
+                or (voice and "multilingual" in voice.lower())
+            )
+        ):
+            from utils.text_processing import normalize_polytonic_greek
+
+            text = normalize_polytonic_greek(text)
+
         # Create and start TTS thread
         self.tts_thread = TTSThread(text, engine_name, lang_code, voice=voice)
         self.tts_thread.start()
@@ -674,6 +687,19 @@ class FlashcardDialog(QDialog):
         engine_name = self.config.get("tts_engine", "gTTS")
         voice = self.config.get("tts_voice") if engine_name == "edge-tts" else None
         lang_code = self.config["language"].split("-")[0].lower()
+
+        # Normalize polytonic Greek for edge-tts if enabled
+        if (
+            self.config.get("normalize_tts", True)
+            and engine_name == "edge-tts"
+            and (
+                lang_code.startswith("el")
+                or (voice and "multilingual" in voice.lower())
+            )
+        ):
+            from utils.text_processing import normalize_polytonic_greek
+
+            text = normalize_polytonic_greek(text)
 
         # Create and start TTS thread with slow speed
         self.tts_thread = TTSThread(

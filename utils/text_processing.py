@@ -4,6 +4,7 @@ Includes text normalization, IPA conversion, and AI response cleaning
 """
 
 import re
+import unicodedata
 
 
 def normalize_text(text):
@@ -12,9 +13,47 @@ def normalize_text(text):
     Removes punctuation, converts to lowercase, normalizes whitespace
     """
     text = text.lower().strip()
-    text = re.sub(r'[^\w\s]', '', text)  # Remove punctuation
-    text = re.sub(r'\s+', ' ', text)  # Normalize whitespace
+    text = re.sub(r"[^\w\s]", "", text)  # Remove punctuation
+    text = re.sub(r"\s+", " ", text)  # Normalize whitespace
     return text
+
+
+def normalize_polytonic_greek(text: str) -> str:
+    """
+    Normalize polytonic Greek text to monotonic for TTS engines that don't support polytonic.
+    - NFC normalizes Unicode
+    - Strips breathing marks (smooth & rough)
+    - Strips iota subscript
+    - Converts polytonic accents (varia, perispomeni) to monotonic (oxia/tonos)
+
+    This is safe to call on non-Greek text (returns unchanged).
+    """
+    if not text:
+        return text
+
+    # Step 1: Decompose to NFD so all diacritics become separate combining chars
+    text = unicodedata.normalize("NFD", text)
+
+    # Combining diacritics to handle
+    SMOOTH_BREATHING = "\u0313"  # ̓ (psili / spiritus lenis)
+    ROUGH_BREATHING = "\u0314"  # ̔ (dasia / spiritus asper)
+    IOTA_SUBSCRIPT = "\u0345"  # ͅ
+    VARIA = "\u0300"  # grave  ̀
+    PERISPOMENI = "\u0342"  # circumflex  ͂
+    OXIA_COMBINING = "\u0301"  # acute  ́ (target)
+
+    # Step 2 & 3: Filter/replace combining characters
+    result = []
+    for ch in text:
+        if ch in (SMOOTH_BREATHING, ROUGH_BREATHING, IOTA_SUBSCRIPT):
+            continue  # drop entirely
+        elif ch in (VARIA, PERISPOMENI):
+            result.append(OXIA_COMBINING)  # replace with simple acute
+        else:
+            result.append(ch)
+
+    # Step 4: Recompose to NFC
+    return unicodedata.normalize("NFC", "".join(result))
 
 
 def clean_ai_response(response):
@@ -27,17 +66,17 @@ def clean_ai_response(response):
     # Remove common markdown artifacts
     cleaned = response.strip()
     cleaned = cleaned.replace("```", "")  # Remove code blocks
-    cleaned = cleaned.replace("**", "")   # Remove bold markers
+    cleaned = cleaned.replace("**", "")  # Remove bold markers
     cleaned = cleaned.replace("*", "")  # Remove italic markers
 
     # Remove blank lines and normalize whitespace
-    lines = [line.strip() for line in cleaned.split('\n') if line.strip()]
-    cleaned = '\n'.join(lines)
+    lines = [line.strip() for line in cleaned.split("\n") if line.strip()]
+    cleaned = "\n".join(lines)
 
     # Remove common prefixes/suffixes for single-line responses
-    if '\n' not in cleaned:
+    if "\n" not in cleaned:
         for line in lines:
-            if line and not line.lower().startswith(('note:', 'tip:', 'hint:')):
+            if line and not line.lower().startswith(("note:", "tip:", "hint:")):
                 cleaned = line
                 break
 
@@ -52,10 +91,10 @@ def clean_display_text(text):
         return ""
 
     # Split into lines, strip each line, and filter out empty lines
-    lines = [line.strip() for line in text.split('\n') if line.strip()]
+    lines = [line.strip() for line in text.split("\n") if line.strip()]
 
     # Join with single newlines
-    cleaned = '\n'.join(lines)
+    cleaned = "\n".join(lines)
 
     return cleaned.strip()
 
@@ -76,34 +115,116 @@ def text_to_ipa_modern(text):
     # Enhanced English to IPA mapping with better accuracy
     ipa_map = {
         # Vowels - short
-        'a': 'æ', 'e': 'ɛ', 'i': 'ɪ', 'o': 'ɒ', 'u': 'ʌ',
+        "a": "æ",
+        "e": "ɛ",
+        "i": "ɪ",
+        "o": "ɒ",
+        "u": "ʌ",
         # Vowels - long
-        'aa': 'ɑː', 'ee': 'iː', 'ii': 'aɪ', 'oo': 'uː', 'uu': 'uː',
+        "aa": "ɑː",
+        "ee": "iː",
+        "ii": "aɪ",
+        "oo": "uː",
+        "uu": "uː",
         # Consonants
-        'b': 'b', 'c': 'k', 'd': 'd', 'f': 'f', 'g': 'ɡ',
-        'h': 'h', 'j': 'dʒ', 'k': 'k', 'l': 'l', 'm': 'm',
-        'n': 'n', 'p': 'p', 'q': 'k', 'r': 'ɹ', 's': 's',
-        't': 't', 'v': 'v', 'w': 'w', 'x': 'ks', 'y': 'j', 'z': 'z',
+        "b": "b",
+        "c": "k",
+        "d": "d",
+        "f": "f",
+        "g": "ɡ",
+        "h": "h",
+        "j": "dʒ",
+        "k": "k",
+        "l": "l",
+        "m": "m",
+        "n": "n",
+        "p": "p",
+        "q": "k",
+        "r": "ɹ",
+        "s": "s",
+        "t": "t",
+        "v": "v",
+        "w": "w",
+        "x": "ks",
+        "y": "j",
+        "z": "z",
         # Common digraphs and trigraphs
-        'th': 'θ', 'ch': 'tʃ', 'sh': 'ʃ', 'ph': 'f', 'wh': 'ʍ',
-        'ck': 'k', 'qu': 'kw', 'ng': 'ŋ', 'gh': 'ɡ', 'sc': 'sk',
-        'sch': 'sk', 'scr': 'skɹ', 'shr': 'ʃɹ', 'thr': 'θɹ',
+        "th": "θ",
+        "ch": "tʃ",
+        "sh": "ʃ",
+        "ph": "f",
+        "wh": "ʍ",
+        "ck": "k",
+        "qu": "kw",
+        "ng": "ŋ",
+        "gh": "ɡ",
+        "sc": "sk",
+        "sch": "sk",
+        "scr": "skɹ",
+        "shr": "ʃɹ",
+        "thr": "θɹ",
         # Vowel combinations - diphthongs
-        'ai': 'eɪ', 'ay': 'eɪ', 'au': 'ɔː', 'aw': 'ɔː',
-        'ea': 'iː', 'ee': 'iː', 'ei': 'aɪ', 'ey': 'aɪ',
-        'ie': 'aɪ', 'oa': 'əʊ', 'oo': 'uː', 'ou': 'aʊ', 'ow': 'aʊ',
-        'ue': 'uː', 'ui': 'aɪ', 'ew': 'juː', 'oi': 'ɔɪ', 'oy': 'ɔɪ',
-        'ar': 'ɑː', 'er': 'ɜː', 'ir': 'ɜː', 'or': 'ɔː', 'ur': 'ɜː',
+        "ai": "eɪ",
+        "ay": "eɪ",
+        "au": "ɔː",
+        "aw": "ɔː",
+        "ea": "iː",
+        "ee": "iː",
+        "ei": "aɪ",
+        "ey": "aɪ",
+        "ie": "aɪ",
+        "oa": "əʊ",
+        "oo": "uː",
+        "ou": "aʊ",
+        "ow": "aʊ",
+        "ue": "uː",
+        "ui": "aɪ",
+        "ew": "juː",
+        "oi": "ɔɪ",
+        "oy": "ɔɪ",
+        "ar": "ɑː",
+        "er": "ɜː",
+        "ir": "ɜː",
+        "or": "ɔː",
+        "ur": "ɜː",
         # Silent letters and special cases
-        'kn': 'n', 'gn': 'n', 'wr': 'ɹ', 'mb': 'm',
+        "kn": "n",
+        "gn": "n",
+        "wr": "ɹ",
+        "mb": "m",
         # Common words and phrases
-        'the': 'ðə', 'and': 'ənd', 'of': 'əv', 'to': 'tu', 'in': 'ɪn',
-        'is': 'ɪz', 'it': 'ɪt', 'you': 'juː', 'he': 'hiː', 'she': 'ʃiː',
-        'we': 'wiː', 'they': 'ðeɪ', 'are': 'ɑː', 'was': 'wɒz', 'were': 'wɜː',
-        'have': 'hæv', 'has': 'hæz', 'had': 'hæd', 'do': 'duː', 'does': 'dʌz',
-        'did': 'dɪd', 'will': 'wɪl', 'would': 'wʊd', 'can': 'kæn', 'could': 'kʊd',
-        'shall': 'ʃæl', 'should': 'ʃʊd', 'may': 'meɪ', 'might': 'maɪt',
-        'must': 'mʌst', 'ought': 'ɔːt', 'need': 'niːd'
+        "the": "ðə",
+        "and": "ənd",
+        "of": "əv",
+        "to": "tu",
+        "in": "ɪn",
+        "is": "ɪz",
+        "it": "ɪt",
+        "you": "juː",
+        "he": "hiː",
+        "she": "ʃiː",
+        "we": "wiː",
+        "they": "ðeɪ",
+        "are": "ɑː",
+        "was": "wɒz",
+        "were": "wɜː",
+        "have": "hæv",
+        "has": "hæz",
+        "had": "hæd",
+        "do": "duː",
+        "does": "dʌz",
+        "did": "dɪd",
+        "will": "wɪl",
+        "would": "wʊd",
+        "can": "kæn",
+        "could": "kʊd",
+        "shall": "ʃæl",
+        "should": "ʃʊd",
+        "may": "meɪ",
+        "might": "maɪt",
+        "must": "mʌst",
+        "ought": "ɔːt",
+        "need": "niːd",
     }
 
     # Preprocessing
@@ -113,8 +234,8 @@ def text_to_ipa_modern(text):
 
     for word in words:
         # Remove punctuation for processing but keep it for output
-        clean_word = ''.join(c for c in word if c.isalnum())
-        punctuation = ''.join(c for c in word if not c.isalnum())
+        clean_word = "".join(c for c in word if c.isalnum())
+        punctuation = "".join(c for c in word if not c.isalnum())
 
         if not clean_word:
             if punctuation:
@@ -131,7 +252,7 @@ def text_to_ipa_modern(text):
             # Check for longest possible matches first
             # Check trigraphs
             if i <= len(clean_word) - 3:
-                trigraph = clean_word[i:i+3]
+                trigraph = clean_word[i : i + 3]
                 if trigraph in ipa_map:
                     ipa_word += ipa_map[trigraph]
                     i += 3
@@ -140,7 +261,7 @@ def text_to_ipa_modern(text):
 
             # Check digraphs
             if i <= len(clean_word) - 2:
-                digraph = clean_word[i:i+2]
+                digraph = clean_word[i : i + 2]
                 if digraph in ipa_map:
                     ipa_word += ipa_map[digraph]
                     i += 2
@@ -163,7 +284,7 @@ def text_to_ipa_modern(text):
 
         ipa_words.append(ipa_word)
 
-    return ' '.join(ipa_words)
+    return " ".join(ipa_words)
 
 
 def split_into_sentences(text):
@@ -171,7 +292,7 @@ def split_into_sentences(text):
     Split text into sentences
     """
     # Simple sentence splitting
-    sentences = re.split(r'(?<=[.!?])\s+', text.strip())
+    sentences = re.split(r"(?<=[.!?])\s+", text.strip())
     return [s.strip() for s in sentences if s.strip()]
 
 
@@ -181,7 +302,7 @@ def count_syllables(word):
     Simple heuristic based on vowel groups
     """
     word = word.lower()
-    vowels = 'aeiouy'
+    vowels = "aeiouy"
     count = 0
     prev_was_vowel = False
 
@@ -194,7 +315,7 @@ def count_syllables(word):
             prev_was_vowel = False
 
     # Silent 'e' at the end
-    if word.endswith('e') and count > 1:
+    if word.endswith("e") and count > 1:
         count -= 1
 
     return max(1, count)
@@ -206,6 +327,7 @@ def calculate_similarity(text1, text2):
     Returns a value between 0 and 1
     """
     from difflib import SequenceMatcher
+
     return SequenceMatcher(None, normalize_text(text1), normalize_text(text2)).ratio()
 
 
@@ -223,16 +345,22 @@ def highlight_differences(reference, recognized):
 
     result = []
     for tag, i1, i2, j1, j2 in matcher.get_opcodes():
-        if tag == 'equal':
-            result.append(' '.join(ref_words[i1:i2]))
-        elif tag == 'replace':
-            result.append(f'<span style="color: orange;">{" ".join(rec_words[j1:j2])}</span>')
-        elif tag == 'delete':
-            result.append(f'<span style="color: red;">[{" ".join(ref_words[i1:i2])}]</span>')
-        elif tag == 'insert':
-            result.append(f'<span style="color: blue;">{" ".join(rec_words[j1:j2])}</span>')
+        if tag == "equal":
+            result.append(" ".join(ref_words[i1:i2]))
+        elif tag == "replace":
+            result.append(
+                f'<span style="color: orange;">{" ".join(rec_words[j1:j2])}</span>'
+            )
+        elif tag == "delete":
+            result.append(
+                f'<span style="color: red;">[{" ".join(ref_words[i1:i2])}]</span>'
+            )
+        elif tag == "insert":
+            result.append(
+                f'<span style="color: blue;">{" ".join(rec_words[j1:j2])}</span>'
+            )
 
-    return ' '.join(result)
+    return " ".join(result)
 
 
 def format_timestamp(seconds):
@@ -250,7 +378,7 @@ def truncate_text(text, max_length=50, suffix="..."):
     """
     if len(text) <= max_length:
         return text
-    return text[:max_length - len(suffix)] + suffix
+    return text[: max_length - len(suffix)] + suffix
 
 
 class TextProcessor:
@@ -268,15 +396,15 @@ class TextProcessor:
         """
         result = text
         for operation in operations:
-            if operation == 'normalize':
+            if operation == "normalize":
                 result = normalize_text(result)
-            elif operation == 'clean_ai':
+            elif operation == "clean_ai":
                 result = clean_ai_response(result)
-            elif operation == 'clean_display':
+            elif operation == "clean_display":
                 result = clean_display_text(result)
-            elif operation == 'to_ipa':
+            elif operation == "to_ipa":
                 result = text_to_ipa(result)
-            elif operation == 'sentences':
+            elif operation == "sentences":
                 result = split_into_sentences(result)
             self.history.append((operation, result))
         return result

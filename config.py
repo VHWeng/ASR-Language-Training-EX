@@ -15,6 +15,7 @@ from PyQt5.QtWidgets import (
     QSpinBox,
     QGridLayout,
     QTextEdit,
+    QCheckBox,
 )
 
 
@@ -41,6 +42,7 @@ DEFAULT_CONFIG = {
     "tts_engine": "gTTS",
     "tts_speed": "normal",
     "tts_voice": "en-US-BrianMultilingualNeural",
+    "normalize_tts": True,  # Normalize polytonic Greek for edge-tts
     # ASR engine settings
     "asr_engines": ["Google Speech Recognition", "Whisper", "Qwen3-ASR"],
     "asr_engine_settings": {
@@ -248,6 +250,16 @@ class ConfigDialog(QDialog):
         tts_layout.addWidget(self.voice_label)
         tts_layout.addWidget(self.voice_combo)
 
+        # Normalize polytonic Greek checkbox
+        self.normalize_tts_cb = QCheckBox("Normalize polytonic Greek text for edge-tts")
+        self.normalize_tts_cb.setToolTip(
+            "When enabled, polytonic Greek (Ancient/Church) will be normalized to monotonic "
+            "for better TTS pronunciation. Only applies to edge-tts engine when using Greek "
+            "language (el) or a Multilingual voice."
+        )
+        self.normalize_tts_cb.setChecked(self.current_config.get("normalize_tts", True))
+        tts_layout.addWidget(self.normalize_tts_cb)
+
         # Info label about voice selection
         self.tts_info_label = QLabel(
             "Note: gTTS uses language setting only. edge-tts offers specific voices."
@@ -429,7 +441,9 @@ class ConfigDialog(QDialog):
                 print("[DEBUG] edge_tts imported successfully")
                 # asyncio.run() creates a brand-new event loop — safe in a plain thread
                 voices = asyncio.run(edge_tts.list_voices())
-                print(f"[DEBUG] asyncio.run(list_voices()) returned {len(voices)} voices")
+                print(
+                    f"[DEBUG] asyncio.run(list_voices()) returned {len(voices)} voices"
+                )
 
                 if not voices:
                     print("[DEBUG] WARNING: voice list is empty!")
@@ -452,6 +466,7 @@ class ConfigDialog(QDialog):
             except Exception as e:
                 print(f"[DEBUG] Exception fetching voices: {type(e).__name__}: {e}")
                 import traceback
+
                 traceback.print_exc()
                 voices_data = [(f"Error loading voices: {e}", None)]
 
@@ -661,6 +676,7 @@ class ConfigDialog(QDialog):
             "tts_voice": self.voice_combo.currentData()
             if self.voice_combo.currentData()
             else DEFAULT_CONFIG["tts_voice"],
+            "normalize_tts": self.normalize_tts_cb.isChecked(),
             # Include default settings for new features
             "asr_engines": DEFAULT_CONFIG["asr_engines"],
             "tts_engines": DEFAULT_CONFIG["tts_engines"],

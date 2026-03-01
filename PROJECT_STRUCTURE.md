@@ -155,6 +155,7 @@ ASR_Language_Training/
 - IPA pronunciation generation
 - Text cleaning utilities
 - Diff/highlight functionality
+- **Polytonic Greek normalization** for edge-tts (convert ancient/Church Greek to monotonic)
 
 #### `storage.py`
 - File I/O operations

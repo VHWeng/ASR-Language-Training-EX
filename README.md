@@ -24,6 +24,7 @@ An advanced speech recognition application with pronunciation training capabilit
 - ASR conversion with accuracy scoring
 - Pronunciation feedback and assessment
 - **Multiple TTS Engines**: Support for gTTS (Google) and Microsoft Edge TTS (edge-tts) with configurable voice selection
+- **Polytonic Greek Normalization**: Automatic conversion of polytonic Greek to monotonic for edge-tts (configurable, enabled by default)
 
 ### 🎴 Flashcard Mode
 - Interactive flashcard learning with spaced repetition
