@@ -228,6 +228,25 @@ Note: Edge TTS voices are provided by Microsoft and require internet connectivit
 - **Slow Speed**: Click `🐢 Slow TTS` for slower articulation (helpful for learning)
 - **Flashcard Mode**: TTS buttons appear on the back of cards for review after revealing the answer
 
+### Configuration Presets
+
+The Configuration dialog now includes a **Presets** section with three buttons:
+
+- **Save Configuration...**: Saves the current configuration to a JSON file in the `Data/` directory.
+- **Load Configuration...**: Loads configuration from a previously saved JSON file.
+- **Restore Defaults**: Resets all settings to their factory defaults.
+
+Presets store all configuration options, including ASR engine, language, model, sample rate, energy threshold, pronunciation threshold, column mappings, TTS engine/voice, and polytonic Greek normalization. You can create multiple presets for different use cases (e.g., one for Greek with edge-tts, another for English with gTTS).
+
+To use presets:
+1. Open the Configuration dialog (gear icon).
+2. Adjust settings as desired.
+3. Click **Save Configuration...**, choose a filename, and save.
+4. Later, click **Load Configuration...** and select the preset file to restore.
+5. Use **Restore Defaults** to revert to the original defaults.
+
+Presets are saved as human‑readable JSON files in the `Data/` directory and can be backed up or shared.
+
 ### Polytonic Greek Normalization
 
 When using **edge-tts** with **Greek language (el)** or a **Multilingual** voice, the application can automatically normalize polytonic (ancient/ecclesiastical) Greek text to monotonic for better pronunciation.

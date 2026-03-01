@@ -240,6 +240,16 @@ The original `asr_app.py` (single 109KB file) has been refactored into:
 5. **Collaboration**: Multiple developers can work on different modules
 6. **Reusability**: Components can be reused in other projects
 
+## Data Directory
+
+The `Data/` directory stores runtime files:
+
+- `Logo.png` – Application logo (fallback)
+- `sample_vocabulary.csv` – Example vocabulary
+- `flashcard_progress.json` – Flashcard learning progress
+- `session_data.json` – Session history logs
+- `*.json` – Configuration presets saved by users
+
 ## Ready for Development
 
 This modular structure enables:

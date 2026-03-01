@@ -48,6 +48,7 @@ An advanced speech recognition application with pronunciation training capabilit
 - Multiple delimiter support (comma, pipe, tab, semicolon)
 - Language selection for speech recognition
 - **TTS Engine Selection**: Choose between gTTS and Edge TTS, with voice selection for Edge TTS
+- **Preset Management**: Save and load configuration presets as JSON files in the `Data/` directory, and restore defaults with one click
 - Intuitive user interface with clear status feedback
 
 ## Installation

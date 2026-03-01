@@ -3,6 +3,9 @@ Configuration module for ASR Application
 Contains ConfigDialog class and default settings
 """
 
+import json
+from pathlib import Path
+
 from PyQt5.QtWidgets import (
     QDialog,
     QVBoxLayout,
@@ -16,6 +19,8 @@ from PyQt5.QtWidgets import (
     QGridLayout,
     QTextEdit,
     QCheckBox,
+    QFileDialog,
+    QMessageBox,
 )
 
 
@@ -89,6 +94,9 @@ class ConfigDialog(QDialog):
         self.setWindowTitle("Configuration")
         self.setModal(True)
         self.setMinimumWidth(500)
+        # Preset management
+        self.presets_dir = Path(__file__).parent / "Data"
+        self.pending_tts_voice = None
         self.init_ui()
 
     def init_ui(self):
@@ -341,6 +349,21 @@ class ConfigDialog(QDialog):
         vocab_config_group.setLayout(vocab_config_layout)
         layout.addWidget(vocab_config_group)
 
+        # Presets management
+        presets_group = QGroupBox("Presets")
+        presets_layout = QHBoxLayout()
+        self.save_preset_btn = QPushButton("Save Configuration...")
+        self.load_preset_btn = QPushButton("Load Configuration...")
+        self.restore_defaults_btn = QPushButton("Restore Defaults")
+        self.save_preset_btn.clicked.connect(self.save_configuration)
+        self.load_preset_btn.clicked.connect(self.load_configuration)
+        self.restore_defaults_btn.clicked.connect(self.restore_defaults)
+        presets_layout.addWidget(self.save_preset_btn)
+        presets_layout.addWidget(self.load_preset_btn)
+        presets_layout.addWidget(self.restore_defaults_btn)
+        presets_group.setLayout(presets_layout)
+        layout.addWidget(presets_group)
+
         # Buttons
         btn_layout = QHBoxLayout()
         self.ok_btn = QPushButton("OK")
@@ -489,22 +512,29 @@ class ConfigDialog(QDialog):
                     self.voice_combo.addItem(display, data)
                 print(f"[DEBUG] voice_combo now has {self.voice_combo.count()} items")
 
-                # Set default voice
-                default_voice = self.current_config.get(
-                    "tts_voice", DEFAULT_CONFIG["tts_voice"]
+                # Determine voice to select: pending from set_config or current config
+                desired_voice = getattr(self, "pending_tts_voice", None)
+                if desired_voice is None:
+                    desired_voice = self.current_config.get(
+                        "tts_voice", DEFAULT_CONFIG["tts_voice"]
+                    )
+                print(
+                    f"[DEBUG] Looking for voice: '{desired_voice}' (pending: {getattr(self, 'pending_tts_voice', None)})"
                 )
-                print(f"[DEBUG] Looking for default voice: '{default_voice}'")
-                idx = self.voice_combo.findData(default_voice)
+                idx = self.voice_combo.findData(desired_voice)
                 if idx >= 0:
                     self.voice_combo.setCurrentIndex(idx)
-                    print(f"[DEBUG] Default voice set at index {idx}")
+                    print(f"[DEBUG] Voice set at index {idx}")
                 else:
                     print(
-                        f"[DEBUG] Default voice '{default_voice}' not found — "
-                        "selecting index 0"
+                        f"[DEBUG] Voice '{desired_voice}' not found — selecting index 0"
                     )
                     if self.voice_combo.count() > 0:
                         self.voice_combo.setCurrentIndex(0)
+                # Clear pending after use
+                if hasattr(self, "pending_tts_voice"):
+                    del self.pending_tts_voice
+                    print("[DEBUG] Cleared pending_tts_voice")
 
                 # Enable the combo only when we have real entries
                 has_valid = len(voices_data) > 0 and voices_data[0][1] is not None
@@ -651,6 +681,156 @@ class ConfigDialog(QDialog):
                 self.status_log.append(
                     f"Cleaned up temporary audio file: {temp_audio_file}"
                 )
+
+    def set_config(self, config_dict):
+        """Populate the dialog controls from a configuration dictionary."""
+        # ASR Engine
+        self.engine_combo.setCurrentText(
+            config_dict.get("engine", DEFAULT_CONFIG["engine"])
+        )
+        # Language (by display name)
+        lang_name = config_dict.get("language_name", DEFAULT_CONFIG["language_name"])
+        self.lang_combo.setCurrentText(lang_name)
+        # Model
+        self.model_combo.setCurrentText(
+            config_dict.get("model", DEFAULT_CONFIG["model"])
+        )
+        # Sample rate
+        self.rate_entry.setText(
+            str(config_dict.get("sample_rate", DEFAULT_CONFIG["sample_rate"]))
+        )
+        # Energy threshold
+        self.energy_entry.setText(
+            str(config_dict.get("energy_threshold", DEFAULT_CONFIG["energy_threshold"]))
+        )
+        # Pronunciation threshold
+        self.pron_spin.setValue(
+            config_dict.get(
+                "pronunciation_threshold", DEFAULT_CONFIG["pronunciation_threshold"]
+            )
+        )
+        # Vocabulary delimiter
+        self.delim_combo.setCurrentText(
+            config_dict.get("vocab_delimiter", DEFAULT_CONFIG["vocab_delimiter"])
+        )
+        # Column mappings
+        cols = config_dict.get("vocab_columns", DEFAULT_CONFIG["vocab_columns"])
+        self.ref_col_spin.setValue(
+            cols.get("reference", DEFAULT_CONFIG["vocab_columns"]["reference"])
+        )
+        self.def_col_spin.setValue(
+            cols.get("definition", DEFAULT_CONFIG["vocab_columns"]["definition"])
+        )
+        self.eng_pron_col_spin.setValue(
+            cols.get(
+                "english_pronunciation",
+                DEFAULT_CONFIG["vocab_columns"]["english_pronunciation"],
+            )
+        )
+        self.ipa_col_spin.setValue(
+            cols.get(
+                "ipa_pronunciation",
+                DEFAULT_CONFIG["vocab_columns"]["ipa_pronunciation"],
+            )
+        )
+        self.img_desc_col_spin.setValue(
+            cols.get(
+                "image_description",
+                DEFAULT_CONFIG["vocab_columns"]["image_description"],
+            )
+        )
+        self.img_file_col_spin.setValue(
+            cols.get(
+                "image_filename", DEFAULT_CONFIG["vocab_columns"]["image_filename"]
+            )
+        )
+        self.grammar_col_spin.setValue(
+            cols.get("grammar", DEFAULT_CONFIG["vocab_columns"]["grammar"])
+        )
+        # TTS engine
+        self.tts_engine_combo.setCurrentText(
+            config_dict.get("tts_engine", DEFAULT_CONFIG["tts_engine"])
+        )
+        # TTS voice: set pending for edge-tts; apply immediately if voice list already loaded
+        self.pending_tts_voice = config_dict.get(
+            "tts_voice", DEFAULT_CONFIG["tts_voice"]
+        )
+        if (
+            self.tts_engine_combo.currentText() == "edge-tts"
+            and self.voice_combo.count() > 0
+        ):
+            idx = self.voice_combo.findData(self.pending_tts_voice)
+            if idx >= 0:
+                self.voice_combo.setCurrentIndex(idx)
+            self.pending_tts_voice = None
+        elif self.tts_engine_combo.currentText() != "edge-tts":
+            self.pending_tts_voice = None
+        # Normalize TTS polytonic Greek
+        self.normalize_tts_cb.setChecked(
+            config_dict.get("normalize_tts", DEFAULT_CONFIG["normalize_tts"])
+        )
+
+    def save_configuration(self):
+        """Save the current configuration to a JSON file in Data directory."""
+        config = self.get_config()
+        self.presets_dir.mkdir(parents=True, exist_ok=True)
+        default_name = "config_preset.json"
+        file_path, _ = QFileDialog.getSaveFileName(
+            self,
+            "Save Configuration",
+            str(self.presets_dir / default_name),
+            "JSON Files (*.json);;All Files (*)",
+        )
+        if not file_path:
+            return
+        try:
+            with open(file_path, "w", encoding="utf-8") as fp:
+                json.dump(config, fp, indent=4, ensure_ascii=False)
+            QMessageBox.information(
+                self, "Configuration Saved", f"Saved to:\n{file_path}"
+            )
+        except Exception as e:
+            QMessageBox.critical(
+                self, "Save Error", f"Failed to save configuration:\n{e}"
+            )
+
+    def load_configuration(self):
+        """Load configuration from a JSON file."""
+        self.presets_dir.mkdir(parents=True, exist_ok=True)
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Load Configuration",
+            str(self.presets_dir),
+            "JSON Files (*.json);;All Files (*)",
+        )
+        if not file_path:
+            return
+        try:
+            with open(file_path, "r", encoding="utf-8") as fp:
+                loaded = json.load(fp)
+            self.set_config(loaded)
+            QMessageBox.information(
+                self, "Configuration Loaded", f"Loaded from:\n{file_path}"
+            )
+        except Exception as e:
+            QMessageBox.critical(
+                self, "Load Error", f"Failed to load configuration:\n{e}"
+            )
+
+    def restore_defaults(self):
+        """Restore all settings to default values."""
+        reply = QMessageBox.question(
+            self,
+            "Restore Defaults",
+            "Are you sure you want to restore all settings to defaults?\nThis cannot be undone.",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No,
+        )
+        if reply == QMessageBox.Yes:
+            self.set_config(DEFAULT_CONFIG)
+            QMessageBox.information(
+                self, "Defaults Restored", "All settings have been reset to defaults."
+            )
 
     def get_config(self):
         """Get the current configuration as a dictionary"""
