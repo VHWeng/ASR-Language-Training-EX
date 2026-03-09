@@ -159,10 +159,15 @@ class ASRApp(QMainWindow):
         self.show_grammar_cb.setChecked(False)
         self.show_grammar_cb.toggled.connect(self.toggle_grammar_display)
 
+        self.show_mnemonics_cb = QCheckBox("Show Mnemonics")
+        self.show_mnemonics_cb.setChecked(False)
+        self.show_mnemonics_cb.toggled.connect(self.toggle_mnemonics_display)
+
         mode_layout.addWidget(self.training_mode_cb)
         mode_layout.addWidget(self.show_pronunciation_cb)
         mode_layout.addWidget(self.show_definition_cb)
         mode_layout.addWidget(self.show_grammar_cb)
+        mode_layout.addWidget(self.show_mnemonics_cb)
         mode_layout.addStretch()
         pron_layout.addLayout(mode_layout)
 
@@ -271,6 +276,17 @@ class ASRApp(QMainWindow):
         self.grammar_text.setFont(QFont("Arial", 12))
         self.grammar_text.hide()
         pron_layout.addWidget(self.grammar_text)
+
+        # Mnemonics text box
+        self.mnemonics_text = QTextEdit()
+        self.mnemonics_text.setMaximumHeight(90)
+        self.mnemonics_text.setPlaceholderText(
+            "Mnemonics for the reference text will appear here..."
+        )
+        self.mnemonics_text.setReadOnly(True)
+        self.mnemonics_text.setFont(QFont("Arial", 12))
+        self.mnemonics_text.hide()
+        pron_layout.addWidget(self.mnemonics_text)
 
         # Image viewer
         self.image_viewer = QLabel()
@@ -431,11 +447,14 @@ class ASRApp(QMainWindow):
             self.pronunciation_text.show()
             self.definition_text.show()
             self.grammar_text.show()
+            if self.show_mnemonics_cb.isChecked():
+                self.mnemonics_text.show()
             self.tabs.setCurrentIndex(1)
         else:
             self.pronunciation_text.hide()
             self.definition_text.hide()
             self.grammar_text.hide()
+            self.mnemonics_text.hide()
 
     def toggle_pronunciation_display(self, enabled):
         """Toggle pronunciation text box visibility"""
@@ -445,11 +464,14 @@ class ASRApp(QMainWindow):
                 self.definition_text.show()
             if self.show_grammar_cb.isChecked():
                 self.grammar_text.show()
+            if self.show_mnemonics_cb.isChecked():
+                self.mnemonics_text.show()
             self.update_combined_pronunciation()
         else:
             self.pronunciation_text.hide()
             self.definition_text.hide()
             self.grammar_text.hide()
+            self.mnemonics_text.hide()
 
     def toggle_grammar_display(self, enabled):
         """Toggle grammar text box visibility"""
@@ -457,6 +479,13 @@ class ASRApp(QMainWindow):
             self.grammar_text.show()
         else:
             self.grammar_text.hide()
+
+    def toggle_mnemonics_display(self, enabled):
+        """Toggle mnemonics text box visibility"""
+        if enabled:
+            self.mnemonics_text.show()
+        else:
+            self.mnemonics_text.hide()
 
     # ============== Vocabulary Methods ==============
 
@@ -546,6 +575,12 @@ class ASRApp(QMainWindow):
         grammar = entry.get("grammar", "")
         self.grammar_text.setPlainText(
             clean_display_text(grammar) if grammar else "No grammar available"
+        )
+
+        # Update mnemonics
+        mnemonics = entry.get("mnemonics", "")
+        self.mnemonics_text.setPlainText(
+            clean_display_text(mnemonics) if mnemonics else "No mnemonics available"
         )
 
         # Update pronunciation

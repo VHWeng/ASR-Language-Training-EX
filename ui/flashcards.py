@@ -388,6 +388,10 @@ class FlashcardDialog(QDialog):
 
         # Top right controls for back card
         back_top_layout = QHBoxLayout()
+        self.show_mnemonics_cb = QCheckBox("Show Mnemonics")
+        self.show_mnemonics_cb.setChecked(True)
+        self.show_mnemonics_cb.toggled.connect(self.toggle_mnemonics_display)
+        back_top_layout.addWidget(self.show_mnemonics_cb)
         back_top_layout.addStretch()
         self.back_config_btn = QPushButton("⚙️")
         self.back_config_btn.setFixedSize(30, 30)
@@ -441,6 +445,15 @@ class FlashcardDialog(QDialog):
         self.definition_text.setFont(QFont("Arial", 16))
         self.definition_text.setMinimumSize(300, 100)
         back_card_layout.addWidget(self.definition_text)
+
+        # Under Definition: Mnemonics
+        self.mnemonics_text = QTextEdit()
+        self.mnemonics_text.setReadOnly(True)
+        self.mnemonics_text.setAlignment(Qt.AlignCenter)
+        self.mnemonics_text.setFont(QFont("Arial", 14))
+        self.mnemonics_text.setMinimumSize(300, 80)
+        self.mnemonics_text.hide()  # Initially hidden until enabled
+        back_card_layout.addWidget(self.mnemonics_text)
 
         # Under Definition: Pronunciation Feedback
         feedback_layout = QHBoxLayout()
@@ -559,6 +572,9 @@ class FlashcardDialog(QDialog):
         self.show_pronunciation_cb.setChecked(False)
         self.pronunciation_label.hide()
 
+        # Hide mnemonics
+        self.mnemonics_text.hide()
+
         self.flip_btn.setText("Show ▶")
         self.flip_btn.setEnabled(True)
         self.playback_btn.setEnabled(False)
@@ -588,6 +604,9 @@ class FlashcardDialog(QDialog):
             self.back_word_label.setText(item.get("reference", "N/A"))
             self.back_pronunciation_label.setText(item.get("ipa_pronunciation", ""))
             self.definition_text.setText(item.get("definition", "No definition"))
+
+            # Update mnemonics based on checkbox
+            self.toggle_mnemonics_display(self.show_mnemonics_cb.isChecked())
 
             # Only reset feedback if no pronunciation feedback exists yet
             # Otherwise, preserve the existing pronunciation feedback
@@ -894,6 +913,17 @@ class FlashcardDialog(QDialog):
             self.pronunciation_label.show()
         else:
             self.pronunciation_label.hide()
+
+    def toggle_mnemonics_display(self, enabled):
+        """Toggle mnemonics text box visibility on back card"""
+        if enabled and self.current_item:
+            mnemonics = self.current_item.get("mnemonics", "")
+            self.mnemonics_text.setPlainText(
+                mnemonics if mnemonics else "No mnemonics available"
+            )
+            self.mnemonics_text.show()
+        else:
+            self.mnemonics_text.hide()
 
     def toggle_image_display(self, enabled, item=None):
         if enabled:

@@ -42,6 +42,7 @@ DEFAULT_CONFIG = {
         "image_description": 5,
         "image_filename": 6,
         "grammar": 7,
+        "mnemonics": 8,
     },
     # TTS settings
     "tts_engine": "gTTS",
@@ -344,6 +345,13 @@ class ConfigDialog(QDialog):
         self.grammar_col_spin.setRange(1, 20)
         self.grammar_col_spin.setValue(7)
         col_mapping_layout.addWidget(self.grammar_col_spin, 6, 1)
+
+        # Mnemonics column
+        col_mapping_layout.addWidget(QLabel("Mnemonics Column:"), 7, 0)
+        self.mnemonics_col_spin = QSpinBox()
+        self.mnemonics_col_spin.setRange(1, 20)
+        self.mnemonics_col_spin.setValue(8)
+        col_mapping_layout.addWidget(self.mnemonics_col_spin, 7, 1)
 
         vocab_config_layout.addLayout(col_mapping_layout)
         vocab_config_group.setLayout(vocab_config_layout)
@@ -747,6 +755,9 @@ class ConfigDialog(QDialog):
         self.grammar_col_spin.setValue(
             cols.get("grammar", DEFAULT_CONFIG["vocab_columns"]["grammar"])
         )
+        self.mnemonics_col_spin.setValue(
+            cols.get("mnemonics", DEFAULT_CONFIG["vocab_columns"]["mnemonics"])
+        )
         # TTS engine
         self.tts_engine_combo.setCurrentText(
             config_dict.get("tts_engine", DEFAULT_CONFIG["tts_engine"])
@@ -851,6 +862,7 @@ class ConfigDialog(QDialog):
                 "image_description": self.img_desc_col_spin.value(),
                 "image_filename": self.img_file_col_spin.value(),
                 "grammar": self.grammar_col_spin.value(),
+                "mnemonics": self.mnemonics_col_spin.value(),
             },
             "tts_engine": self.tts_engine_combo.currentText(),
             "tts_voice": self.voice_combo.currentData()

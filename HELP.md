@@ -79,16 +79,24 @@ Column 4: IPA Pronunciation
 Column 5: Image Description
 Column 6: Image Filename
 Column 7: Grammar
+Column 8: Mnemonics (memory aids)
 ```
 
 ### Example Vocabulary File
 ```csv
-Word|Definition|English Pron|IPA Pron|Image Desc|Image File|Grammar
-hello|A greeting|heh-low|həˈloʊ|Waving hand|hello.png|Noun, common
-world|The earth|wurld|wɜrld|Planet Earth|world.png|Noun, singular
-αὐτός|he, she, it|af-toss|ˈav.tos|Person pointing|person.png|Pronoun, 3rd person
-βλέπω|I see|vleh-po|ˈvle.po|Eye seeing|eye.png|Verb, present tense
+Word|Definition|English Pron|IPA Pron|Image Desc|Image File|Grammar|Mnemonics
+hello|A greeting|heh-low|həˈloʊ|Waving hand|hello.png|Noun, common|Think of answering the phone: "Hello?"
+world|The earth|wurld|wɜrld|Planet Earth|world.png|Noun, singular|Our whole world
+αὐτός|he, she, it|af-toss|ˈav.tos|Person pointing|person.png|Pronoun, 3rd person|AUTOnomous = self = αὐτός
+βλέπω|I see|vleh-po|ˈvle.po|Eye seeing|eye.png|Verb, present tense|BLEP from blinking = see
 ```
+
+### Mnemonics Feature
+- **Purpose**: Add memory aids to help you remember vocabulary more effectively
+- **Configuration**: Set which column contains mnemonics in Configuration (gear icon ⚙) → "Mnemonics Column" (default: column 8)
+- **Main Window**: Toggle visibility with "Show Mnemonics" checkbox; appears below the grammar section
+- **Flashcard Mode**: On the back of each card, use the "Show Mnemonics" checkbox (top-left) to display memory aids alongside the definition
+- **Content**: Use creative associations, acronyms, visual imagery, or language connections to enhance memory retention
 
 ### Loading Vocabulary
 1. Click "📁 Load Vocabulary"
@@ -160,7 +168,11 @@ world|The earth|wurld|wɜrld|Planet Earth|world.png|Noun, singular
    - Supported formats: PNG, JPG, JPEG, GIF
    - If a vocabulary image is missing or unavailable, the application logo (Data/Logo.png) is displayed as a fallback
    - Images are displayed at appropriate size for the card layout
-6. **Rate Difficulty**: After flipping, rate how well you knew the card:
+6. **Show Mnemonics**: Use the "Show Mnemonics" checkbox on the back of the card to display memory aids:
+   - Mnemonics appear below the definition when enabled
+   - Toggle on/off to focus on different aspects of learning
+   - Helpful for recalling tricky words or complex concepts
+7. **Rate Difficulty**: After flipping, rate how well you knew the card:
    - **Again**: Didn't know it - will appear again soon
    - **Hard**: Difficult - shortened review interval
    - **Good**: Knew it - normal review interval
@@ -333,6 +345,9 @@ A: Minimum 4GB RAM recommended. Whisper processing benefits from more powerful C
 **Q: Can I create my own vocabulary files?**
 A: Yes! Create CSV files with your desired content following the column structure outlined above.
 
+**Q: What are mnemonics and how do I use them?**
+A: Mnemonics are memory aids that help you remember vocabulary more effectively. Add them to column 8 of your vocabulary file, then use the "Show Mnemonics" checkbox in the main window or on flashcard backs to display them. Create acronyms, associations, visual imagery, or language connections to enhance retention.
+
 **Q: Can I add images to my vocabulary?**
 A: Yes! Images can be included in your vocabulary files. For CSV/TXT files, add image filenames in column 6. For ZIP files, place images in an "images/" subdirectory and reference them in column 6.
 
@@ -387,5 +402,18 @@ For additional help:
 
 ---
 
-*Last updated: February 2026*
-*Version: 3.0.0*
+*Last updated: March 2026*
+*Version: 3.1.0*
+
+### Recent Updates
+
+#### 🆕 New Feature: Mnemonics Support (Version 3.1.0)
+- Added configurable mnemonics column (default: column 8) in vocabulary files
+- **Main Window**: Toggle-able "Show Mnemonics" checkbox and text display below grammar
+- **Flashcard Mode**: Mnemonics checkbox on back of cards; displays below definition
+- Follows existing patterns for clean integration with grammar and image features
+- Fully configurable column mapping in Configuration dialog
+- Sample vocabulary file with mnemonics included: `Data/sample_with_mnemonics.csv`
+
+#### Previous Versions
+- **3.0.0** (February 2026): Modular architecture, flashcard mode, multi-engine support

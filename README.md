@@ -11,6 +11,7 @@ An advanced speech recognition application with pronunciation training capabilit
 - **Vocabulary Management**: Load and navigate through vocabulary sets from CSV/ZIP files
 - **Image Support**: Display images associated with vocabulary entries; includes default logo fallback when images are missing
 - **Grammar Display**: Show grammatical information alongside vocabulary entries
+- **Mnemonics Support**: Add memory aids to vocabulary with configurable column mapping and selective display in both main and flashcard windows
 
 ### 📚 Vocabulary System
 - Load vocabulary from CSV, TXT, or ZIP files
@@ -130,11 +131,13 @@ python main.py
    - ZIP files should contain:
      - Vocabulary file in the root directory
      - Images folder named "images/" with corresponding image files
+   - Ensure your vocabulary file includes a column for mnemonics (default: column 8) if you want to use this feature
 
 3. **Interactive Learning**
    - Navigate through vocabulary items using Previous/Next buttons
-   - View definitions, pronunciations, images, and grammatical information
+   - View definitions, pronunciations, images, grammatical information, and mnemonics
    - Built-in tools enhance entries with IPA pronunciations
+   - Use the "Show Mnemonics" checkbox to toggle the mnemonics display
 
 4. **Pronunciation Practice**
    - Listen to correct pronunciation via TTS (normal or slow speed)
@@ -146,6 +149,7 @@ python main.py
    - Practice vocabulary with spaced repetition
    - Rate your knowledge level for each card
    - Track your progress over time
+   - Use the "Show Mnemonics" checkbox on the back of cards to display memory aids
 
 ### Advanced Features
 
@@ -154,6 +158,7 @@ python main.py
 - Choose from multiple delimiter types (comma, pipe, tab, semicolon)
 - Select preferred speech recognition engine and language
 - **Grammar Column**: Specify the column containing grammar information in your vocabulary files.
+- **Mnemonics Column**: Specify the column containing memory aids for vocabulary entries (default: column 8)
 - **Image Support**: Include images in vocabulary files for visual learning context
 
 #### Image Integration
@@ -409,6 +414,13 @@ This modular structure enables:
 - Plugin architecture for community extensions
 
 ## Latest Updates (2026)
+
+### New Feature: Mnemonics Support (Version 3.1.0)
+- Added configurable mnemonics column (default: column 8) for vocabulary files
+- **Main Window**: "Show Mnemonics" checkbox and text box below grammar section
+- **Flashcard Mode**: Mnemonics display on back of cards with toggle checkbox
+- Fully integrated with existing column mapping configuration
+- Sample vocabulary file with mnemonics: `Data/sample_with_mnemonics.csv`
 
 ### New ASR Engine: Qwen3-ASR
 - Added support for Qwen3-ASR engine
